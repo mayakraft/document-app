@@ -1,0 +1,20 @@
+[package]
+name = "tauri-doc-app"
+version = "0.0.0"
+description = "A Tauri App"
+authors = ["you"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { version = "1", features = [] }
+
+[dependencies]
+tauri = { version = "1", features = [ "path-all", "fs-remove-dir", "fs-create-dir", "window-all", "fs-write-file", "dialog-ask", "dialog-open", "fs-remove-file", "fs-read-dir", "fs-exists", "clipboard-all", "fs-copy-file", "dialog-save", "dialog-confirm", "fs-rename-file", "process-all", "dialog-message", "fs-read-file", "shell-open"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[features]
+# This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
+custom-protocol = ["tauri/custom-protocol"]
