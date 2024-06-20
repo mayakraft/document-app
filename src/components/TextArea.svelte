@@ -1,9 +1,11 @@
 <script lang="ts">
-	// import { FileString } from "../../stores/file.ts";
 	import { Model } from "../stores/Model.ts";
+	import { FileModified } from "../stores/FileModified.ts";
+
+	const oninput = () => $FileModified = true;
 </script>
 
-<textarea bind:value={$Model}></textarea>
+<textarea bind:value={$Model} {oninput}></textarea>
 
 <style>
 	textarea {

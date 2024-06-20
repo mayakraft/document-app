@@ -5,7 +5,7 @@ import {
 	exit,
 } from "@tauri-apps/api/process";
 import {
-	TryQuit,
+	TryCloseFile,
 	NewFile,
 	LoadFile,
 	OpenFile,
@@ -26,7 +26,7 @@ const methods = {
 	openFile: OpenFile,
 	saveFileAs: SaveFileAs,
 	saveFile: SaveFile,
-	quit: async () => await TryQuit() ? exit(0): undefined,
+	quit: async () => await TryCloseFile("Quit without saving?") ? exit(0): undefined,
 };
 
 // window.fs = fs;

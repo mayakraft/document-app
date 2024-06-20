@@ -33,6 +33,9 @@ import {
 	GetModel,
 	SetNewModel,
 } from "./Model.ts";
+import {
+	FileModified,
+} from "./FileModified.ts";
 
 /**
  * @description appears on the title bar
@@ -89,8 +92,6 @@ type FilePathInfo = {
  * @value {string}
  */
 export const FilePath = writable<string>();
-
-export const FileModified = writable<boolean>(true);
 
 // This doesn't work in the way I expected, Svelte derived stores with
 // async values. This one time get() will get the current value (previous),
@@ -298,6 +299,9 @@ export const NewFile = async () => {
  * into the app, otherwise an error message will be shown.
  */
 export const LoadFile = async (contents: any, filePath: string) => {
+	// if the current file is modified, do not proceed
+	if (!await TryCloseFile()) { return; }
+
 	const { extension } = await getFilenameParts(filePath);
 
 	// list all supported extensions here
@@ -412,15 +416,21 @@ const appDealloc = () => {
 	if (dropUnlistener) { dropUnlistener(); }
 }
 
-export const TryQuit = async () => {
-	// if (!get(FileModified)) {
-	// 	return true;
-	// }
-	return await confirm("Quit without saving?");
+/**
+ * @description Check if it's okay to close/exit/new-file.. if the
+ * currently opened file is unsaved, prompt the user.
+ * @returns {Promise<boolean>} true if we are good to proceed, false
+ * if the user has requested to not proceed (do not close the file).
+ */
+export const TryCloseFile = async (message = "Close without saving?"): Promise<boolean> => {
+	if (!get(FileModified)) {
+		return true;
+	}
+	return await confirm(message);
 };
 
 export const OnCloseRequested = async (event: CloseRequestedEvent) => {
-	if (!await TryQuit()) {
+	if (!await TryCloseFile("Quit without saving?")) {
 		event.preventDefault();
 	}
 };
