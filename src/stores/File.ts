@@ -40,7 +40,7 @@ import {
 /**
  * @description appears on the title bar
  */
-const APP_NAME = "tauri-doc-app"
+const APP_NAME = "tauri-doc-app";
 
 /**
  * @description This app is allowed to support many different file types,
@@ -57,6 +57,11 @@ const SaveFileFilters = {
 	name: "Text Files",
 	extensions: [DOCUMENT_EXTENSION]
 };
+
+const imageFileFilter = (...extensions: string[]) => ({
+	name: "image",
+	extensions,
+});
 
 /**
  * @description the default file name for a new file
@@ -211,10 +216,7 @@ const makeNumberedFilenames = (count: number, name: string, extension: string) =
  */
 export const exportTextFile = async (string: string, ext = "svg") => {
 	const filePath = await save({
-		filters: [{
-			name: "image",
-			extensions: [ext],
-		}]
+		filters: [imageFileFilter(ext)]
 	});
 	if (filePath == null) { return; }
 	const { directory, name } = await getFilenameParts(filePath);
@@ -227,10 +229,7 @@ export const exportTextFile = async (string: string, ext = "svg") => {
  */
 export const exportBinaryFile = async (binaryFile: ArrayBuffer, ext = "png") => {
 	const filePath = await save({
-		filters: [{
-			name: "image",
-			extensions: [ext],
-		}]
+		filters: [imageFileFilter(ext)]
 	});
 	if (filePath == null) { return; }
 	const { directory, name } = await getFilenameParts(filePath);
@@ -243,10 +242,7 @@ export const exportBinaryFile = async (binaryFile: ArrayBuffer, ext = "png") => 
  */
 export const exportTextFiles = async (textStrings = [], ext = "svg") => {
 	const filePath = await save({
-		filters: [{
-			name: "image",
-			extensions: [ext],
-		}]
+		filters: [imageFileFilter(ext)]
 	});
 	if (filePath == null) { return; }
 	const { directory, name, extension } = await getFilenameParts(filePath);
@@ -262,10 +258,7 @@ export const exportTextFiles = async (textStrings = [], ext = "svg") => {
  */
 export const exportBinaryFiles = async (binaryFiles = [], ext = "png") => {
 	const filePath = await save({
-		filters: [{
-			name: "image",
-			extensions: [ext],
-		}]
+		filters: [imageFileFilter(ext)]
 	});
 	if (filePath == null) { return; }
 	const { directory, name, extension } = await getFilenameParts(filePath);
