@@ -1,12 +1,23 @@
-# Tauri document app
+# Electron / Tauri document app
 
-A document-based app, in this case, is an app which can open and modify a file, create a new file, and provide simple UI like prompting before exiting if the file was modified without saving.
+A **document app** is an app whose sole purpose is to edit a file; the name comes from the MacOS app class name. This app is able to open and modify a file (a text file in this case), or start a new file from scratch. The app provides the typical UI expected in this case like prompting before exiting an unsaved file and prompting before overwriting.
 
-This is a cross-platform (Windows Mac Linux) template document app built in Tauri and Svelte. Use this as a foundation and build your app on top of it.
+This project exists in two implementations, one in [Electron](https://www.electronjs.org/), one in [Tauri](https://tauri.app/), the app itself is cross-platform (Windows, Mac, Linux), the front end runs Svelte.
+
+Use this as a foundation and build your app on top of it.
 
 # Developers
 
 ```bash
+cd electron
+npm i
+npm run dev
+```
+
+or
+
+```bash
+cd tauri
 npm i
 npm run tauri dev
 ```
