@@ -1,5 +1,5 @@
-import { get, writable, derived } from "svelte/store";
-import { Model } from "./Model.ts";
+// import { app } from "electron";
+import { writable, derived, type Writable } from "svelte/store";
 // import { GetModel, SetNewModel } from "./Model.ts";
 // import { SetNewModel } from "./Model.ts";
 import { type FilePathInfo, DOCUMENT_EXTENSION } from "../../../types/types.ts";
@@ -9,7 +9,7 @@ const APP_NAME = "Document App";
 /**
  * @description the default file name for a new file
  */
-const UNTITLED_FILE = `untitled.${DOCUMENT_EXTENSION}`;
+export const UNTITLED_FILENAME = `untitled.${DOCUMENT_EXTENSION}`;
 
 // don't think we will really use this
 //
@@ -35,55 +35,35 @@ export const FileInfo = writable<FilePathInfo>();
  */
 export const FileModified = writable<boolean>(false);
 
-export const openFile = async () => {
-	const { data, fileInfo } = await window.api.openFile();
-	if (fileInfo) {
-		Model.set(data);
-		FileInfo.set(fileInfo);
-		FileModified.set(false);
-	}
-	// console.log("fileInfo", fileInfo);
-	// console.log("data", data);
-};
-
-export const saveFile = async () => {
-	// console.log("$FileInfo", get(FileInfo));
-	// console.log("$Model", get(Model));
-	const success = await window.api.saveFile(get(FileInfo), get(Model));
-	// console.log("success", success);
-	if (success) {
-		FileModified.set(false);
-	}
-};
-
-export const saveFileAs = async () => {
-	// console.log("$FileInfo", get(FileInfo));
-	// console.log("$Model", get(Model));
-	const fileInfo = await window.api.saveFileAs(get(Model));
-	if (fileInfo) {
-		FileInfo.set(fileInfo);
-		FileModified.set(false);
-	}
-	// console.log("fileInfo", fileInfo);
-};
-
 /**
  * @description Watch "FilePath" for any changes, update the window title
  * to include the currently opened filename.
  */
-const OnFileNameChange = derived(
+const AppTitle = derived<[Writable<FilePathInfo>, Writable<boolean>], string>(
 	[FileInfo, FileModified],
-	async ([$FileInfo, $FileModified]) => {
-		const displayName = $FileInfo === undefined ? UNTITLED_FILE : $FileInfo.file;
+	([$FileInfo, $FileModified]) => {
+		const displayName = $FileInfo === undefined ? UNTITLED_FILENAME : $FileInfo.file;
 		const savedIndicator = $FileModified ? " *" : "";
-		const titleString = `${APP_NAME} - ${displayName}${savedIndicator}`;
-		window.api.setAppTitle(titleString);
+		return `${APP_NAME} - ${displayName}${savedIndicator}`;
+	},
+	"",
+);
+
+let previousAppTitle = "";
+const AppTitleUpdater = derived(
+	AppTitle,
+	($AppTitle) => {
+		if ($AppTitle === previousAppTitle) {
+			return;
+		}
+		previousAppTitle = $AppTitle;
+		window.api.setAppTitle($AppTitle);
 	},
 	undefined,
 );
 
 // todo: top level subscribe has no unsubscribe call.
-OnFileNameChange.subscribe(() => {});
+AppTitleUpdater.subscribe(() => {});
 
 // This doesn't work in the way I expected, Svelte derived stores with
 // async values. This one time get() will get the current value (previous),

@@ -1,10 +1,13 @@
-import { app, shell, BrowserWindow, ipcMain } from "electron";
+import { app, shell, Menu, BrowserWindow, ipcMain } from "electron";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import { join } from "node:path";
 import icon from "../../resources/icon.png?asset";
-import { pathJoin, openFile, saveFile, saveFileAs } from "./filesystem.ts";
+import { openFile, saveFile, saveFileAs } from "./filesystem.ts";
+import { setAppTitle } from "./app.ts";
+import { newFileDialog, unsavedChangesDialog } from "./dialogs.ts";
+import { makeTemplate } from "./menu.ts";
 
-function createWindow(): void {
+function createWindow(): BrowserWindow {
 	// Create the browser window.
 	const mainWindow = new BrowserWindow({
 		width: 900,
@@ -17,9 +20,6 @@ function createWindow(): void {
 			sandbox: false,
 		},
 	});
-
-	// this is the web content
-	// console.log(mainWindow.webContents)
 
 	mainWindow.on("ready-to-show", () => {
 		mainWindow.show();
@@ -38,17 +38,10 @@ function createWindow(): void {
 		mainWindow.loadFile(join(__dirname, "../renderer/index.html"));
 	}
 
-	mainWindow.webContents.openDevTools();
-}
+	// mainWindow.webContents.openDevTools();
 
-const setAppTitle = (event, title) => {
-	const webContents = event.sender;
-	const win = BrowserWindow.fromWebContents(webContents);
-	if (!win) {
-		return;
-	}
-	win.setTitle(title);
-};
+	return mainWindow;
+}
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -64,31 +57,62 @@ app.whenReady().then(() => {
 		optimizer.watchWindowShortcuts(window);
 	});
 
-	// IPC test
-	ipcMain.on("ping", () => console.log("pong"));
+	// IPC
 	ipcMain.on("setAppTitle", setAppTitle);
-	ipcMain.handle("pathJoin", pathJoin);
+	ipcMain.on("quitApp", () => app.quit());
+	ipcMain.handle("newFileDialog", newFileDialog);
+	ipcMain.handle("unsavedChangesDialog", unsavedChangesDialog);
+	// ipcMain.handle("pathJoin", pathJoin);
 	ipcMain.handle("openFile", openFile);
 	ipcMain.handle("saveFile", saveFile);
 	ipcMain.handle("saveFileAs", saveFileAs);
 
-	createWindow();
+	const mainWindow = createWindow();
+	const menu = Menu.buildFromTemplate(makeTemplate(mainWindow));
+	Menu.setApplicationMenu(menu);
 
 	app.on("activate", function () {
 		// On macOS it's common to re-create a window in the app when the
 		// dock icon is clicked and there are no other windows open.
 		if (BrowserWindow.getAllWindows().length === 0) createWindow();
 	});
+
+	mainWindow.on("close", (event) => {
+		event.preventDefault();
+		const result = mainWindow.webContents.send("queryUnsavedChanges");
+		console.log("attempted close", result);
+		// mainWindow.webContents.send("menuQuit");
+	});
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
-app.on("window-all-closed", () => {
-	if (process.platform !== "darwin") {
-		app.quit();
-	}
-});
+// app.on("window-all-closed", (event) => {
+// 	mainWindow.webContents.send("menuQuit");
+// 	event.preventDefault();
+// 	// if (process.platform !== "darwin") {
+// 	// 	app.quit();
+// 	// }
+// 	// app.quit();
+// });
 
-// In this file you can include the rest of your app"s specific main process
-// code. You can also put them in separate files and require them here.
+// app.on("before-quit", (event) => {
+// 	event.preventDefault();
+// 	mainWindow.webContents.send("menuQuit");
+// });
+
+// app.on("will-quit", (event) => {
+// 	mainWindow.webContents.send("menuQuit");
+// 	event.preventDefault();
+// });
+
+// app.on("quit", (event) => {
+// 	mainWindow.webContents.send("menuQuit");
+// 	event.preventDefault();
+// });
+
+// app.on("window-all-closed", (event) => {
+// 	mainWindow.webContents.send("menuQuit");
+// 	event.preventDefault();
+// });

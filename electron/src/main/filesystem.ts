@@ -1,9 +1,8 @@
 import { app, dialog, IpcMainInvokeEvent } from "electron";
-// import fs, { NoParamCallback } from "node:fs";
-import { promises as fs, NoParamCallback } from "node:fs";
+// import { IpcMain } from "electron/main";
+import { promises as fs } from "node:fs";
 import path from "node:path";
 import { type FilePathInfo, DOCUMENT_EXTENSION } from "../types/types.ts";
-import { IpcMain } from "electron/main";
 
 const OpenFileFilters = {
 	name: "Text Files",
@@ -33,7 +32,7 @@ export const NEW_FILE_PATH = () => path.join(app.getPath("home"), UNTITLED_FILE)
 /**
  *
  */
-export const pathJoin = (event: IpcMainInvokeEvent, ...paths: string[]) => path.join(...paths);
+export const pathJoin = (_: IpcMainInvokeEvent, ...paths: string[]) => path.join(...paths);
 
 /**
  * @description Pick apart a file path into useful parts
@@ -237,11 +236,9 @@ export const openFile = async (): Promise<{ data?: string; fileInfo?: FilePathIn
  * @description Perform a "SaveAs" operation for the currently opened file.
  */
 export const saveFileAs = async (
-	event: IpcMainInvokeEvent,
+	_: IpcMainInvokeEvent,
 	data: string,
 ): Promise<FilePathInfo | undefined> => {
-	console.log("saveFileAs event", event);
-	console.log("saveFileAs data", data);
 	const defaultPath = app.getPath("home");
 	const filters = [SaveFileFilters];
 	const options = !defaultPath || defaultPath === "" ? { filters } : { filters, defaultPath };
@@ -277,7 +274,7 @@ export const saveFileAs = async (
  * run the "saveAs" method.
  */
 export const saveFile = async (
-	event: IpcMainInvokeEvent,
+	_: IpcMainInvokeEvent,
 	fileInfo: FilePathInfo,
 	data: string,
 ): Promise<boolean> => {
