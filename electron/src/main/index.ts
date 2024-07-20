@@ -2,7 +2,7 @@ import { app, shell, Menu, BrowserWindow, ipcMain } from "electron";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import { join } from "node:path";
 import icon from "../../resources/icon.png?asset";
-import { openFile, saveFile, saveFileAs, pathJoin } from "./filesystem.ts";
+import { openFile, saveFile, saveFileAs, pathJoin, makeFilePathInfo } from "./filesystem.ts";
 import { setAppTitle } from "./app.ts";
 import { newFileDialog, unsavedChangesDialog } from "./dialogs.ts";
 import { makeTemplate } from "./menu.ts";
@@ -65,6 +65,7 @@ app.whenReady().then(() => {
 	ipcMain.handle("pathJoin", pathJoin);
 	ipcMain.handle("openFile", openFile);
 	ipcMain.handle("saveFile", saveFile);
+	ipcMain.handle("makeFilePathInfo", makeFilePathInfo);
 	ipcMain.handle("saveFileAs", saveFileAs);
 
 	const mainWindow = createWindow();
@@ -77,6 +78,34 @@ app.whenReady().then(() => {
 		if (BrowserWindow.getAllWindows().length === 0) createWindow();
 	});
 
+	app.on("before-quit", (event) => {
+		console.log("before-quit");
+		// event.preventDefault();
+		// mainWindow.webContents.send("menuQuit");
+	});
+
+	app.on("will-quit", (event) => {
+		console.log("will-quit");
+		// event.preventDefault();
+		// mainWindow.webContents.send("menuQuit");
+	});
+
+	app.on("quit", (event) => {
+		console.log("quit");
+		// event.preventDefault();
+		// mainWindow.webContents.send("menuQuit");
+	});
+
+	app.on("window-all-closed", (event) => {
+		console.log("window-all-closed");
+		// event.preventDefault();
+		// mainWindow.webContents.send("menuQuit");
+		// if (process.platform !== "darwin") {
+		// 	app.quit();
+		// }
+		app.quit();
+	});
+
 	// mainWindow.on("close", (event) => {
 	// 	event.preventDefault();
 	// 	const result = mainWindow.webContents.send("queryUnsavedChanges");
@@ -84,35 +113,3 @@ app.whenReady().then(() => {
 	// 	// mainWindow.webContents.send("menuQuit");
 	// });
 });
-
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-// app.on("window-all-closed", (event) => {
-// 	mainWindow.webContents.send("menuQuit");
-// 	event.preventDefault();
-// 	// if (process.platform !== "darwin") {
-// 	// 	app.quit();
-// 	// }
-// 	// app.quit();
-// });
-
-// app.on("before-quit", (event) => {
-// 	event.preventDefault();
-// 	mainWindow.webContents.send("menuQuit");
-// });
-
-// app.on("will-quit", (event) => {
-// 	mainWindow.webContents.send("menuQuit");
-// 	event.preventDefault();
-// });
-
-// app.on("quit", (event) => {
-// 	mainWindow.webContents.send("menuQuit");
-// 	event.preventDefault();
-// });
-
-// app.on("window-all-closed", (event) => {
-// 	mainWindow.webContents.send("menuQuit");
-// 	event.preventDefault();
-// });

@@ -1,10 +1,11 @@
 import { get } from "svelte/store";
 import { Model } from "./stores/Model.ts";
 import { FileModified, FileInfo, UNTITLED_FILENAME } from "./stores/File.ts";
-import { DOCUMENT_EXTENSION } from "../../types/types.ts";
+import { DOCUMENT_EXTENSION, type FilePathInfo } from "../../types/types.ts";
 
 /**
- * @description additional communication between back and front ends
+ * @description for front end - back end communication, this is the counterpart
+ * to "main/index.ts, methods which exist from the front end side.
  */
 
 // 'before-quit' event
@@ -79,6 +80,7 @@ export const queryUnsavedChanges = () => {
 	return get(FileModified);
 };
 
+console.log("binding window.api menu methods");
 window.api.menuQuit(quitApp);
 window.api.menuNew(newFile);
 window.api.menuOpen(openFile);
@@ -87,40 +89,40 @@ window.api.menuSaveAs(saveFileAs);
 window.api.queryUnsavedChanges(queryUnsavedChanges);
 
 /**
- *
+ * @description bind an "ondrop" event handler and when it fires
+ * pass in the result event object into this method.
  */
-// let dropUnlistener: Function;
+export const fileDropDidUpdate = async (event: DragEvent) => {
+	// drag and drop file event object does not contain
+	// the filename, we have to store it here and re-match later.
+	let fileInfo: FilePathInfo;
 
-/**
- * @description
- */
-// const StartDropListener = async () => {
-// 	// BrowserWindow.getFocusedWindow()
-// 	dropUnlistener = await appWindow.onFileDropEvent(async (event) => {
-// 		if (event.payload.type === "hover") {
-// 			// console.log("User hovering", event.payload.paths);
-// 		} else if (event.payload.type === "drop") {
-// 			const filePath = event.payload.paths[0];
-// 			try {
-// 				LoadFile(await fs.readFile(filePath), filePath);
-// 			} catch (error) {
-// 				// could not load file
-// 			}
-// 			// console.log("User dropped", event.payload.paths);
-// 		} else {
-// 			// console.log("File drop cancelled");
-// 		}
-// 	});
-// 	// you need to call unlisten if your handler goes out of scope e.g. the component is unmounted
-// 	// unlisten()
-// };
+	const fileOnLoad = (event: ProgressEvent<FileReader>) => {
+		if (event.target && event.target.result && typeof event.target.result === "string") {
+			Model.set(event.target.result);
+			FileInfo.set(fileInfo);
+			FileModified.set(false);
+		}
+	};
 
-// on app start
-// StartDropListener();
+	if (event.dataTransfer && event.dataTransfer.items) {
+		const filenames = [...event.dataTransfer.files].map((el) => el.name);
 
-// // on app dealloc
-// const appDealloc = () => {
-// 	if (dropUnlistener) {
-// 		dropUnlistener();
-// 	}
-// };
+		const transferFile = [...event.dataTransfer.items]
+			.map((item, i) => ({ item, filename: filenames[i] }))
+			.filter((el) => el.item.kind === "file")
+			.map((el) => ({ ...el, contents: el.item.getAsFile() }))
+			.shift();
+
+		if (transferFile) {
+			fileInfo = await window.api.makeFilePathInfo(transferFile.contents.path);
+
+			console.log(transferFile.contents.path);
+			const reader = new FileReader();
+			reader.onload = fileOnLoad;
+			if (transferFile.contents) {
+				reader.readAsText(transferFile.contents);
+			}
+		}
+	}
+};

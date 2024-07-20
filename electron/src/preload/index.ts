@@ -10,15 +10,25 @@ const api = {
 	// two way, front to back and respond
 	newFileDialog: () => ipcRenderer.invoke("newFileDialog"),
 	unsavedChangesDialog: () => ipcRenderer.invoke("unsavedChangesDialog"),
-	pathJoin: () => ipcRenderer.invoke("pathJoin"),
+
 	openFile: () => ipcRenderer.invoke("openFile"),
 	saveFile: (fileInfo: FilePathInfo, data: string) =>
 		ipcRenderer.invoke("saveFile", fileInfo, data),
 	saveFileAs: (data: string): Promise<FilePathInfo | undefined> =>
 		ipcRenderer.invoke("saveFileAs", data),
 
+	pathJoin: () => ipcRenderer.invoke("pathJoin"),
+	makeFilePathInfo: (data: string): Promise<FilePathInfo> =>
+		ipcRenderer.invoke("makeFilePathInfo", data),
+
 	// from menu
-	menuQuit: (callback: Function) => ipcRenderer.on("menuQuit", (_event) => callback()),
+	// menuQuit: (callback: Function) => ipcRenderer.on("menuQuit", (_event) => callback()),
+	menuQuit: (callback: Function) =>
+		ipcRenderer.on("menuQuit", (_event) => {
+			if (callback) {
+				callback();
+			}
+		}),
 	menuNew: (callback: Function) => ipcRenderer.on("menuNew", (_event) => callback()),
 	menuOpen: (callback: Function) => ipcRenderer.on("menuOpen", (_event) => callback()),
 	menuSave: (callback: Function) => ipcRenderer.on("menuSave", (_event) => callback()),

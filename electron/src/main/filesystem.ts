@@ -75,6 +75,11 @@ export const getFilePathInfo = async (filePath: string): Promise<FilePathInfo> =
 	return { fullpath, directory, file, root, extension };
 };
 
+export const makeFilePathInfo = async (
+	_: IpcMainInvokeEvent,
+	filePath: string,
+): Promise<FilePathInfo> => getFilePathInfo(filePath);
+
 /**
  * @description Convert a file name (name + extension) into a sequence of
  * filenames that take the form of name-0000N.ext where 000N is a number

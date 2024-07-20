@@ -1,9 +1,11 @@
 <script lang="ts">
 	import LoadFile from "./LoadFile.svelte";
 	import TextArea from "./TextArea.svelte";
+	import DragAndDrop from "./DragAndDrop.svelte";
 </script>
 
 <main>
+	<DragAndDrop />
 	<LoadFile />
 	<TextArea />
 </main>

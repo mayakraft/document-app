@@ -13,6 +13,7 @@ declare global {
 			openFile: () => void;
 			saveFile: (fileInfo: FilePathInfo, data: string) => void;
 			saveFileAs: (data: string) => Promise<FilePathInfo | undefined>;
+			makeFilePathInfo: (data: string) => Promise<FilePathInfo>;
 			menuQuit: (callback: Function) => void;
 			menuNew: (callback: Function) => void;
 			menuOpen: (callback: Function) => void;
