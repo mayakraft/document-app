@@ -2,7 +2,7 @@ import { app, shell, Menu, BrowserWindow, ipcMain } from "electron";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import { join } from "node:path";
 import icon from "../../resources/icon.png?asset";
-import { openFile, saveFile, saveFileAs } from "./filesystem.ts";
+import { openFile, saveFile, saveFileAs, pathJoin } from "./filesystem.ts";
 import { setAppTitle } from "./app.ts";
 import { newFileDialog, unsavedChangesDialog } from "./dialogs.ts";
 import { makeTemplate } from "./menu.ts";
@@ -62,7 +62,7 @@ app.whenReady().then(() => {
 	ipcMain.on("quitApp", () => app.quit());
 	ipcMain.handle("newFileDialog", newFileDialog);
 	ipcMain.handle("unsavedChangesDialog", unsavedChangesDialog);
-	// ipcMain.handle("pathJoin", pathJoin);
+	ipcMain.handle("pathJoin", pathJoin);
 	ipcMain.handle("openFile", openFile);
 	ipcMain.handle("saveFile", saveFile);
 	ipcMain.handle("saveFileAs", saveFileAs);
@@ -77,12 +77,12 @@ app.whenReady().then(() => {
 		if (BrowserWindow.getAllWindows().length === 0) createWindow();
 	});
 
-	mainWindow.on("close", (event) => {
-		event.preventDefault();
-		const result = mainWindow.webContents.send("queryUnsavedChanges");
-		console.log("attempted close", result);
-		// mainWindow.webContents.send("menuQuit");
-	});
+	// mainWindow.on("close", (event) => {
+	// 	event.preventDefault();
+	// 	const result = mainWindow.webContents.send("queryUnsavedChanges");
+	// 	console.log("attempted close", result);
+	// 	// mainWindow.webContents.send("menuQuit");
+	// });
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common

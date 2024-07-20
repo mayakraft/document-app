@@ -9,7 +9,7 @@ declare global {
 			quitApp: () => void;
 			newFileDialog: () => void;
 			unsavedChangesDialog: () => void;
-			// pathJoin: () => void;
+			pathJoin: () => void;
 			openFile: () => void;
 			saveFile: (fileInfo: FilePathInfo, data: string) => void;
 			saveFileAs: (data: string) => Promise<FilePathInfo | undefined>;

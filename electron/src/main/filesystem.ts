@@ -1,13 +1,12 @@
 import { app, dialog, IpcMainInvokeEvent } from "electron";
-// import { IpcMain } from "electron/main";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { type FilePathInfo, DOCUMENT_EXTENSION } from "../types/types.ts";
 
-const OpenFileFilters = {
-	name: "Text Files",
-	extensions: [DOCUMENT_EXTENSION, "html", "css", "js"],
-};
+// const OpenFileFilters = {
+// 	name: "Text Files",
+// 	extensions: [DOCUMENT_EXTENSION, "html", "css", "js"],
+// };
 
 const SaveFileFilters = {
 	name: "Text Files",
@@ -156,59 +155,25 @@ export const exportBinaryFiles = async (binaryFiles = [], ext = "png") => {
 };
 
 /**
- * @description Load a new file. Unbind any currently opened file, reset the
- * path, disable "Save" by setting FileExists to false.
+ *
  */
-// export const NewFile = async () => {
-// 	if (
-// 		!(await dialog.showMessageBox({
-// 			message: "This will erase all current progress",
-// 			title: "Start a new file?",
-// 			type: "question",
-// 			buttons: ["New File", "Cancel"],
-// 		}))
-// 	) {
-// 		return;
-// 	}
-// 	const filePath = NEW_FILE_PATH();
-// 	SetNewModel("");
-// 	FilePath.set(filePath);
-// 	FileModified.set(false);
-// };
-
-/**
- * @description The main entry point for loading a file.
- * If the file is a supported file format, the file will be loaded
- * into the app, otherwise an error message will be shown.
- */
-// export const LoadFile = async (filePath: string, contents: any) => {
-// 	// if the current file is modified, do not proceed
-// 	if (!(await TryCloseFile())) {
-// 		return;
-// 	}
-
-// 	const { extension } = await getFilePathInfo(filePath);
-
-// 	// list all supported extensions here
-// 	switch (extension.toLowerCase()) {
-// 		case "": // files without an extension might appear here?
-// 		case ".js":
-// 		case ".json":
-// 		case ".txt":
-// 			SetNewModel(contents);
-// 			FilePath.set(filePath ? filePath : NEW_FILE_PATH());
-// 			FileModified.set(false);
-// 			break;
-// 		default:
-// 			// console.log("COULD NOT load file");
-// 			await dialog.showMessageBox({
-// 				message: "please load a supported file type",
-// 				title: "Unknown File Type",
-// 				type: "error",
-// 			});
-// 			break;
-// 	}
-// };
+export const validateFileType = async (fileInfo: FilePathInfo): Promise<boolean> => {
+	// list all supported extensions here
+	switch (fileInfo.extension.toLowerCase()) {
+		case "": // files without an extension might appear here?
+		case ".js":
+		case ".json":
+		case ".txt":
+			return true;
+		default:
+			await dialog.showMessageBox({
+				message: `${fileInfo.extension} file type not supported`,
+				title: "Unknown File Type",
+				type: "error",
+			});
+			return false;
+	}
+};
 
 /**
  * @description Perform an "Open File" operation, which tells the system
@@ -216,18 +181,18 @@ export const exportBinaryFiles = async (binaryFiles = [], ext = "png") => {
  */
 export const openFile = async (): Promise<{ data?: string; fileInfo?: FilePathInfo }> => {
 	const { canceled, filePaths } = await dialog.showOpenDialog({
-		properties: [
-			"openFile",
-			// 'multiSelections'
-		],
+		properties: ["openFile"],
 	});
 
 	if (canceled) {
 		return {};
 	}
-	// todo: hardcoded ignoring more than 1 file
+	// hardcoded ignoring more than 1 file
 	const filePath = filePaths[0];
 	const fileInfo = await getFilePathInfo(filePath);
+	if (!(await validateFileType(fileInfo))) {
+		return {};
+	}
 	const data = await fs.readFile(filePath, { encoding: "utf-8" });
 	return { fileInfo, data };
 };
@@ -246,24 +211,9 @@ export const saveFileAs = async (
 	if (canceled) {
 		return undefined;
 	}
-	// await writeTextFile(filePath, contents);
 	await fs.writeFile(filePath, data);
 	return getFilePathInfo(filePath);
 };
-
-// export const saveFileAs = async (targetDir: string, data: string): Promise<boolean> => {
-// 	const { directory: defaultPath } = await getFilePathInfo(targetDir);
-// 	const filters = [SaveFileFilters];
-// 	const options =
-// 		!targetDir || !defaultPath || defaultPath === "" ? { filters } : { filters, defaultPath };
-// 	const { canceled, filePath } = await dialog.showSaveDialog(options);
-// 	if (canceled) {
-// 		return false;
-// 	}
-// 	// await writeTextFile(filePath, contents);
-// 	await fs.writeFile(filePath, data);
-// 	return true;
-// };
 
 /**
  * @description Perform a "Save" operation for the currently opened file.
@@ -291,64 +241,3 @@ export const saveFile = async (
 			return true;
 		});
 };
-
-// export const SaveFile = async (
-// 	event: IpcMainInvokeEvent,
-// 	fileInfo: FilePathInfo,
-// 	data: string,
-// ): Promise<boolean> => {
-// 	// a couple checks to REALLY make sure that the file already exists
-// 	if (!fileInfo || !fileInfo.fullpath) {
-// 		return saveFileAs(event, data);
-// 	}
-// 	return fs
-// 		.access(fileInfo.fullpath, fs.constants.F_OK)
-// 		.catch(() => saveFileAs(event, data))
-// 		.then(async () => {
-// 			// save file and overwrite contents
-// 			await fs.writeFile(fileInfo.fullpath, data);
-// 			return true;
-// 		});
-// };
-
-/**
- * @description Check if it's okay to close/exit/new-file.. if the
- * currently opened file is unsaved, prompt the user.
- * @returns {Promise<boolean>} true if we are good to proceed, false
- * if the user has requested to not proceed (do not close the file).
- */
-// export const TryCloseFile = async (message = "Close without saving?"): Promise<boolean> => {
-// 	if (!get(FileModified)) {
-// 		return true;
-// 	}
-// 	return dialog
-// 		.showMessageBox({
-// 			message,
-// 			buttons: ["yes", "no"],
-// 		})
-// 		.then(({ response }) => response === 0);
-// };
-
-// export const openFileUTF8 = async (): Promise<{}> => {
-// 	const { canceled, filePaths } = await dialog.showOpenDialog({});
-// 	if (canceled) {
-// 		return { contents: undefined, filePath: undefined };
-// 	}
-// 	const contents = await fs.readFile(filePaths[0], { encoding: "utf-8" });
-// 	return { contents, filePath: filePaths[0] };
-// };
-
-// export const saveFileAs = async (targetDir: string, contents: string) => {
-// 	const { directory: defaultPath } = await getFilePathInfo(targetDir);
-// 	const filters = [SaveFileFilters];
-// 	const options =
-// 		!targetDir || !defaultPath || defaultPath === "" ? { filters } : { filters, defaultPath };
-// 	const { canceled, filePath } = await dialog.showSaveDialog(null, options);
-// 	if (canceled) {
-// 		return;
-// 	}
-// 	// await writeTextFile(filePath, contents);
-// 	await fs.writeFile(filePath, contents);
-// 	FilePath.set(filePath);
-// 	FileModified.set(false);
-// };

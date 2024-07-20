@@ -1,7 +1,4 @@
-import {
-	// get,
-	writable,
-} from "svelte/store";
+import { writable } from "svelte/store";
 
 /**
  * @description Literally, just the contents of the file as a text string,
@@ -11,20 +8,9 @@ import {
 export const Model = writable<string>("");
 
 /**
- * @description Load a new file, replace everything currently open.
- * Instead of calling this, call "LoadFile" from inside the File store.
- * Load file metadata and frames and reset the current frame to frame 0.
- * This should include everything that happens in all the other
- * update/set Frame methods.
+ * @description Clear the model, update any other parts of the app state too.
  */
 export const SetNewModel = (contents: string) => {
-	// Selection.reset();
-	// FileMetadata.set(getFileMetadata(FOLD));
-	// CommandHistory.set([]);
-	// RecalculateView();
-	// CameraMatrix.reset();
-	// WebGLViewMatrix.reset();
+	// if anything is needed, clear the state of the app
 	Model.set(contents);
 };
-
-// export const GetModel = () => (get(Model) || "");

@@ -10,7 +10,7 @@ const api = {
 	// two way, front to back and respond
 	newFileDialog: () => ipcRenderer.invoke("newFileDialog"),
 	unsavedChangesDialog: () => ipcRenderer.invoke("unsavedChangesDialog"),
-	// pathJoin: () => ipcRenderer.invoke("pathJoin"),
+	pathJoin: () => ipcRenderer.invoke("pathJoin"),
 	openFile: () => ipcRenderer.invoke("openFile"),
 	saveFile: (fileInfo: FilePathInfo, data: string) =>
 		ipcRenderer.invoke("saveFile", fileInfo, data),
