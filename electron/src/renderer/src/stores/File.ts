@@ -1,12 +1,6 @@
 import { writable, derived, type Writable } from "svelte/store";
-import { type FilePathInfo, DOCUMENT_EXTENSION } from "../../../types/types.ts";
-
-const APP_NAME = "Document App";
-
-/**
- * @description the default file name for a new file
- */
-export const UNTITLED_FILENAME = `untitled.${DOCUMENT_EXTENSION}`;
+import { APP_NAME, UNTITLED_FILENAME } from "../../../general/constants.ts";
+import { type FilePathInfo } from "../../../general/types.ts";
 
 /**
  * @description The currently opened filename as a full path, including

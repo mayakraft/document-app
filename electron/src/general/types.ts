@@ -1,5 +1,10 @@
 /**
- *
+ * files here are accessible to both the back-end and front-end.
+ * very important! do not include any node core modules.
+ */
+
+/**
+ * @description Verbose file path information
  */
 export type FilePathInfo = {
 	fullpath: string; // "/Users/Maya/Documents/notes.txt"
@@ -8,9 +13,3 @@ export type FilePathInfo = {
 	root: string; // "notes"
 	extension: string; // ".txt"
 };
-
-/**
- * @description This app is allowed to support many different file types,
- * but it should have one "main" file type.
- */
-export const DOCUMENT_EXTENSION = "txt";

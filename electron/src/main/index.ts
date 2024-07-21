@@ -1,13 +1,21 @@
-import { app, shell, Menu, BrowserWindow, ipcMain } from "electron";
+import { app, shell, ipcMain, Menu, BrowserWindow } from "electron";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import { join } from "node:path";
 import icon from "../../resources/icon.png?asset";
-import { openFile, saveFile, saveFileAs, pathJoin, makeFilePathInfo } from "./filesystem.ts";
-import { setAppTitle } from "./app.ts";
-import { newFileDialog, unsavedChangesDialog } from "./dialogs.ts";
 import { makeTemplate } from "./menu.ts";
+import { setAppTitle } from "./mainEvents.ts";
+import {
+	openFile,
+	saveFile,
+	saveFileAs,
+	pathJoin,
+	makeFilePathInfo,
+	unsavedChangesDialog,
+} from "./invokeEvents.ts";
 
-function createWindow(): BrowserWindow {
+// ipcMain sends signal from main to the renderer
+
+const createWindow = (): BrowserWindow => {
 	// Create the browser window.
 	const mainWindow = new BrowserWindow({
 		width: 900,
@@ -41,7 +49,7 @@ function createWindow(): BrowserWindow {
 	// mainWindow.webContents.openDevTools();
 
 	return mainWindow;
-}
+};
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -57,16 +65,17 @@ app.whenReady().then(() => {
 		optimizer.watchWindowShortcuts(window);
 	});
 
-	// IPC
+	// IPC one-way events
 	ipcMain.on("setAppTitle", setAppTitle);
 	ipcMain.on("quitApp", () => app.quit());
-	ipcMain.handle("newFileDialog", newFileDialog);
+
+	// IPC two-way events
 	ipcMain.handle("unsavedChangesDialog", unsavedChangesDialog);
 	ipcMain.handle("pathJoin", pathJoin);
 	ipcMain.handle("openFile", openFile);
 	ipcMain.handle("saveFile", saveFile);
-	ipcMain.handle("makeFilePathInfo", makeFilePathInfo);
 	ipcMain.handle("saveFileAs", saveFileAs);
+	ipcMain.handle("makeFilePathInfo", makeFilePathInfo);
 
 	const mainWindow = createWindow();
 	const menu = Menu.buildFromTemplate(makeTemplate(mainWindow));
@@ -78,24 +87,8 @@ app.whenReady().then(() => {
 		if (BrowserWindow.getAllWindows().length === 0) createWindow();
 	});
 
-	app.on("before-quit", (event) => {
-		console.log("before-quit");
-		// event.preventDefault();
-		// mainWindow.webContents.send("menuQuit");
-	});
-
-	app.on("will-quit", (event) => {
-		console.log("will-quit");
-		// event.preventDefault();
-		// mainWindow.webContents.send("menuQuit");
-	});
-
-	app.on("quit", (event) => {
-		console.log("quit");
-		// event.preventDefault();
-		// mainWindow.webContents.send("menuQuit");
-	});
-
+	// regarding quitting the app, in order of event fire
+	// this happens first, but only if the window was closed (X or red circle).
 	app.on("window-all-closed", (event) => {
 		console.log("window-all-closed");
 		// event.preventDefault();
@@ -104,6 +97,27 @@ app.whenReady().then(() => {
 		// 	app.quit();
 		// }
 		app.quit();
+	});
+
+	// 1st to fire upon quit
+	app.on("before-quit", (event) => {
+		console.log("before-quit");
+		// event.preventDefault();
+		// mainWindow.webContents.send("menuQuit");
+	});
+
+	// 2nd to fire upon quit
+	app.on("will-quit", (event) => {
+		console.log("will-quit");
+		// event.preventDefault();
+		// mainWindow.webContents.send("menuQuit");
+	});
+
+	// 3rd to fire upon quit
+	app.on("quit", (event) => {
+		console.log("quit");
+		// event.preventDefault();
+		// mainWindow.webContents.send("menuQuit");
 	});
 
 	// mainWindow.on("close", (event) => {

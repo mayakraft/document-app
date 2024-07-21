@@ -1,25 +1,23 @@
 import { get } from "svelte/store";
 import { Model } from "./stores/Model.ts";
-import { FileModified, FileInfo, UNTITLED_FILENAME } from "./stores/File.ts";
-import { DOCUMENT_EXTENSION, type FilePathInfo } from "../../types/types.ts";
+import { FileModified, FileInfo } from "./stores/File.ts";
+import { DOCUMENT_EXTENSION, UNTITLED_FILENAME } from "../../general/constants.ts";
+import { type FilePathInfo } from "../../general/types.ts";
 
 /**
- * @description for front end - back end communication, this is the counterpart
- * to "main/index.ts, methods which exist from the front end side.
+ * @description methods available to both the front and back ends.
+ * This is the front-end's counterpart to src/main/index.ts, these methods
+ * exist on the front-end side, but can be called from either front or back end.
  */
 
-// 'before-quit' event
-// 'will-quit' event
-// 'quit' event
-// 'window-all-closed' event
-// prevent closing before saving the file, 2 ways: "Quit menu" or red/X button
-// app.on('window-all-closed', OnCloseRequested);
-// const unlisten = appWindow.onCloseRequested(OnCloseRequested);
-// todo: call unlisten if multiple windows are created / component is unmounted
-// unlisten();
-
+/**
+ * @description ask the app to quit.
+ * this can be called from the front-end or the back-end.
+ * The request must pass through the front end because we need to check
+ * with the model (on the front-end) whether or not there are unsaved changes.
+ */
 export const quitApp = async () => {
-	console.log("quit app request");
+	// console.log("quit app request");
 	if (get(FileModified)) {
 		const { response } = await window.api.unsavedChangesDialog();
 		if (response !== 0) {
@@ -29,9 +27,15 @@ export const quitApp = async () => {
 	window.api.quitApp();
 };
 
+/**
+ * @description ask the app to create a new file.
+ * this can be called from the front-end or the back-end.
+ * The request must pass through the front end because we need to check
+ * with the model (on the front-end) whether or not there are unsaved changes.
+ */
 export const newFile = async () => {
 	if (get(FileModified)) {
-		const { response } = await window.api.newFileDialog();
+		const { response } = await window.api.unsavedChangesDialog("New File", "Cancel");
 		if (response !== 0) {
 			return;
 		}
@@ -47,7 +51,20 @@ export const newFile = async () => {
 	FileModified.set(false);
 };
 
+/**
+ * @description ask the app to open a new file, replacing the current one.
+ * this can be called from the front-end or the back-end.
+ * The request must pass through the front end because we need to check
+ * with the model (on the front-end) whether or not there are unsaved changes.
+ */
 export const openFile = async () => {
+	if (get(FileModified)) {
+		const { response } = await window.api.unsavedChangesDialog("Proceed", "Cancel");
+		if (response !== 0) {
+			return;
+		}
+	}
+
 	const { data, fileInfo } = await window.api.openFile();
 	if (fileInfo) {
 		Model.set(data);
@@ -56,6 +73,10 @@ export const openFile = async () => {
 	}
 };
 
+/**
+ * @description ask the app to save the currently opened file.
+ * this can be called from the front-end or the back-end.
+ */
 export const saveFile = async () => {
 	const success = await window.api.saveFile(get(FileInfo), get(Model));
 	if (success) {
@@ -65,6 +86,10 @@ export const saveFile = async () => {
 	}
 };
 
+/**
+ * @description ask the app to "save as", to write to a new file.
+ * this can be called from the front-end or the back-end.
+ */
 export const saveFileAs = async () => {
 	const fileInfo = await window.api.saveFileAs(get(Model));
 	if (fileInfo) {
@@ -73,24 +98,9 @@ export const saveFileAs = async () => {
 	}
 };
 
-// true: unsaved changes. false: no changes all good to quit or make a new file
-// export const queryUnsavedChanges = () => get(FileModified);
-export const queryUnsavedChanges = () => {
-	console.log("queryUnsavedChanges in front end", get(FileModified));
-	return get(FileModified);
-};
-
-console.log("binding window.api menu methods");
-window.api.menuQuit(quitApp);
-window.api.menuNew(newFile);
-window.api.menuOpen(openFile);
-window.api.menuSave(saveFile);
-window.api.menuSaveAs(saveFileAs);
-window.api.queryUnsavedChanges(queryUnsavedChanges);
-
 /**
- * @description bind an "ondrop" event handler and when it fires
- * pass in the result event object into this method.
+ * @description this method is bound directly to the window DragEvent "ondrop"
+ * and will fire when the user drags in a file from the system into the app.
  */
 export const fileDropDidUpdate = async (event: DragEvent) => {
 	// drag and drop file event object does not contain
@@ -126,3 +136,38 @@ export const fileDropDidUpdate = async (event: DragEvent) => {
 		}
 	}
 };
+
+// 'before-quit' event
+// 'will-quit' event
+// 'quit' event
+// 'window-all-closed' event
+// prevent closing before saving the file, 2 ways: "Quit menu" or red/X button
+// app.on('window-all-closed', OnCloseRequested);
+// const unlisten = appWindow.onCloseRequested(OnCloseRequested);
+// todo: call unlisten if multiple windows are created / component is unmounted
+// unlisten();
+
+let okayToQuit = false;
+
+window.addEventListener("beforeunload", (event) => {
+	console.log("beforeunload");
+	if (okayToQuit) {
+		return;
+	}
+	if (get(FileModified)) {
+		event.preventDefault();
+		window.api.unsavedChangesDialog().then(({ response }) => {
+			if (response === 0) {
+				okayToQuit = true;
+				window.api.quitApp();
+			}
+		});
+	}
+});
+
+window.api.bindMenuQuit(quitApp);
+window.api.bindMenuNew(newFile);
+window.api.bindMenuOpen(openFile);
+window.api.bindMenuSave(saveFile);
+window.api.bindMenuSaveAs(saveFileAs);
+// window.api.queryUnsavedChanges(() => get(FileModified));

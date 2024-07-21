@@ -1,25 +1,29 @@
 import { ElectronAPI } from "@electron-toolkit/preload";
-import { type FilePathInfo } from "../types/types.ts";
+import { type FilePathInfo } from "../general/types.ts";
 
 declare global {
 	interface Window {
 		electron: ElectronAPI;
 		api: {
-			setAppTitle: (title: string) => void;
+			// one way, from renderer to main
 			quitApp: () => void;
-			newFileDialog: () => void;
-			unsavedChangesDialog: () => void;
+			setAppTitle: (title: string) => void;
+
+			// two way, from renderer to main and back
+			unsavedChangesDialog: (yesString: string, noString: string) => void;
 			pathJoin: () => void;
 			openFile: () => void;
 			saveFile: (fileInfo: FilePathInfo, data: string) => void;
 			saveFileAs: (data: string) => Promise<FilePathInfo | undefined>;
 			makeFilePathInfo: (data: string) => Promise<FilePathInfo>;
-			menuQuit: (callback: Function) => void;
-			menuNew: (callback: Function) => void;
-			menuOpen: (callback: Function) => void;
-			menuSave: (callback: Function) => void;
-			menuSaveAs: (callback: Function) => void;
-			queryUnsavedChanges: (callback: Function) => boolean;
+
+			// one way, from main to renderer
+			bindMenuQuit: (callback: Function) => void;
+			bindMenuNew: (callback: Function) => void;
+			bindMenuOpen: (callback: Function) => void;
+			bindMenuSave: (callback: Function) => void;
+			bindMenuSaveAs: (callback: Function) => void;
+			// queryUnsavedChanges: (callback: Function) => boolean;
 		};
 	}
 }
