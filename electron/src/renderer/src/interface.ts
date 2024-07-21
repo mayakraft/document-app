@@ -10,6 +10,8 @@ import { type FilePathInfo } from "../../general/types.ts";
  * exist on the front-end side, but can be called from either front or back end.
  */
 
+let quitInProgress = false;
+
 /**
  * @description ask the app to quit.
  * this can be called from the front-end or the back-end.
@@ -24,6 +26,7 @@ export const quitApp = async () => {
 			return;
 		}
 	}
+	quitInProgress = true;
 	window.api.quitApp();
 };
 
@@ -137,34 +140,29 @@ export const fileDropDidUpdate = async (event: DragEvent) => {
 	}
 };
 
-// 'before-quit' event
-// 'will-quit' event
-// 'quit' event
-// 'window-all-closed' event
-// prevent closing before saving the file, 2 ways: "Quit menu" or red/X button
-// app.on('window-all-closed', OnCloseRequested);
-// const unlisten = appWindow.onCloseRequested(OnCloseRequested);
-// todo: call unlisten if multiple windows are created / component is unmounted
-// unlisten();
-
-let okayToQuit = false;
-
+/**
+ * @description Protection for quitting the app with the "X" or red circle.
+ * This will prompt the user if there are unsaved changes.
+ */
 window.addEventListener("beforeunload", (event) => {
-	console.log("beforeunload");
-	if (okayToQuit) {
+	if (!get(FileModified) || quitInProgress) {
 		return;
 	}
-	if (get(FileModified)) {
-		event.preventDefault();
-		window.api.unsavedChangesDialog().then(({ response }) => {
-			if (response === 0) {
-				okayToQuit = true;
-				window.api.quitApp();
-			}
-		});
-	}
+	event.preventDefault();
+	// https://github.com/electron/electron/issues/7977
+	event.returnValue = false;
+	setTimeout(async () => {
+		const { response } = await window.api.unsavedChangesDialog();
+		quitInProgress = response === 0;
+		if (response === 0) {
+			window.api.quitApp();
+		}
+	});
 });
 
+/**
+ * bind all methods for the from-main-to-renderer IPC communication.
+ */
 window.api.bindMenuQuit(quitApp);
 window.api.bindMenuNew(newFile);
 window.api.bindMenuOpen(openFile);

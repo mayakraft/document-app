@@ -90,40 +90,16 @@ app.whenReady().then(() => {
 	// regarding quitting the app, in order of event fire
 	// this happens first, but only if the window was closed (X or red circle).
 	app.on("window-all-closed", (event) => {
-		console.log("window-all-closed");
-		// event.preventDefault();
-		// mainWindow.webContents.send("menuQuit");
 		// if (process.platform !== "darwin") {
 		// 	app.quit();
 		// }
 		app.quit();
 	});
 
-	// 1st to fire upon quit
-	app.on("before-quit", (event) => {
-		console.log("before-quit");
-		// event.preventDefault();
-		// mainWindow.webContents.send("menuQuit");
-	});
-
-	// 2nd to fire upon quit
-	app.on("will-quit", (event) => {
-		console.log("will-quit");
-		// event.preventDefault();
-		// mainWindow.webContents.send("menuQuit");
-	});
-
-	// 3rd to fire upon quit
-	app.on("quit", (event) => {
-		console.log("quit");
-		// event.preventDefault();
-		// mainWindow.webContents.send("menuQuit");
-	});
-
-	// mainWindow.on("close", (event) => {
-	// 	event.preventDefault();
-	// 	const result = mainWindow.webContents.send("queryUnsavedChanges");
-	// 	console.log("attempted close", result);
-	// 	// mainWindow.webContents.send("menuQuit");
-	// });
+	// // 1st to fire upon quit
+	// app.on("before-quit", (event) => {});
+	// // 2nd to fire upon quit
+	// app.on("will-quit", (event) => {});
+	// // 3rd to fire upon quit
+	// app.on("quit", (event) => {});
 });
