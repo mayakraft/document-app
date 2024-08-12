@@ -1,6 +1,5 @@
-import { get } from "svelte/store";
-import { Model } from "./stores/Model.ts";
-import { FileModified, FileInfo } from "./stores/File.ts";
+import { model } from "./stores/model.svelte.ts";
+import { fileModified, fileInfo } from "./stores/file.svelte.ts";
 import { DOCUMENT_EXTENSION, UNTITLED_FILENAME } from "../../general/constants.ts";
 import { type FilePathInfo } from "../../general/types.ts";
 
@@ -20,7 +19,7 @@ let quitInProgress = false;
  */
 export const quitApp = async () => {
 	// console.log("quit app request");
-	if (get(FileModified)) {
+	if (fileModified.value) {
 		const { response } = await window.api.unsavedChangesDialog();
 		if (response !== 0) {
 			return;
@@ -37,21 +36,21 @@ export const quitApp = async () => {
  * with the model (on the front-end) whether or not there are unsaved changes.
  */
 export const newFile = async () => {
-	if (get(FileModified)) {
+	if (fileModified.value) {
 		const { response } = await window.api.unsavedChangesDialog("New File", "Cancel");
 		if (response !== 0) {
 			return;
 		}
 	}
-	Model.set("");
-	FileInfo.set({
+	model.value = "";
+	fileInfo.value = {
 		fullpath: "",
 		directory: "",
 		file: UNTITLED_FILENAME,
 		root: "untitled",
 		extension: `.${DOCUMENT_EXTENSION}`,
-	});
-	FileModified.set(false);
+	};
+	fileModified.value = false;
 };
 
 /**
@@ -61,18 +60,18 @@ export const newFile = async () => {
  * with the model (on the front-end) whether or not there are unsaved changes.
  */
 export const openFile = async () => {
-	if (get(FileModified)) {
+	if (fileModified.value) {
 		const { response } = await window.api.unsavedChangesDialog("Proceed", "Cancel");
 		if (response !== 0) {
 			return;
 		}
 	}
 
-	const { data, fileInfo } = await window.api.openFile();
-	if (fileInfo) {
-		Model.set(data);
-		FileInfo.set(fileInfo);
-		FileModified.set(false);
+	const { data, fileInfo: info } = await window.api.openFile();
+	if (info) {
+		model.value = data;
+		fileInfo.value = info;
+		fileModified.value = false;
 	}
 };
 
@@ -81,9 +80,11 @@ export const openFile = async () => {
  * this can be called from the front-end or the back-end.
  */
 export const saveFile = async () => {
-	const success = await window.api.saveFile(get(FileInfo), get(Model));
+	// fileInfo.value is an object and a Proxy (due to Svelte 5), this method
+	// will attempt to clone it, can't clone a proxy, so we shallow copy.
+	const success = await window.api.saveFile({ ...fileInfo.value }, model.value);
 	if (success) {
-		FileModified.set(false);
+		fileModified.value = false;
 	} else {
 		saveFileAs();
 	}
@@ -94,10 +95,10 @@ export const saveFile = async () => {
  * this can be called from the front-end or the back-end.
  */
 export const saveFileAs = async () => {
-	const fileInfo = await window.api.saveFileAs(get(Model));
-	if (fileInfo) {
-		FileInfo.set(fileInfo);
-		FileModified.set(false);
+	const info = await window.api.saveFileAs(model.value);
+	if (info) {
+		fileInfo.value = info;
+		fileModified.value = false;
 	}
 };
 
@@ -108,13 +109,13 @@ export const saveFileAs = async () => {
 export const fileDropDidUpdate = async (event: DragEvent) => {
 	// drag and drop file event object does not contain
 	// the filename, we have to store it here and re-match later.
-	let fileInfo: FilePathInfo;
+	let info: FilePathInfo;
 
 	const fileOnLoad = (event: ProgressEvent<FileReader>) => {
 		if (event.target && event.target.result && typeof event.target.result === "string") {
-			Model.set(event.target.result);
-			FileInfo.set(fileInfo);
-			FileModified.set(false);
+			model.value = event.target.result;
+			fileInfo.value = info;
+			fileModified.value = false;
 		}
 	};
 
@@ -128,7 +129,7 @@ export const fileDropDidUpdate = async (event: DragEvent) => {
 			.shift();
 
 		if (transferFile) {
-			fileInfo = await window.api.makeFilePathInfo(transferFile.contents.path);
+			info = await window.api.makeFilePathInfo(transferFile.contents.path);
 
 			console.log(transferFile.contents.path);
 			const reader = new FileReader();
@@ -145,7 +146,7 @@ export const fileDropDidUpdate = async (event: DragEvent) => {
  * This will prompt the user if there are unsaved changes.
  */
 window.addEventListener("beforeunload", (event) => {
-	if (!get(FileModified) || quitInProgress) {
+	if (!fileModified.value || quitInProgress) {
 		return;
 	}
 	event.preventDefault();
@@ -168,4 +169,4 @@ window.api.bindMenuNew(newFile);
 window.api.bindMenuOpen(openFile);
 window.api.bindMenuSave(saveFile);
 window.api.bindMenuSaveAs(saveFileAs);
-// window.api.queryUnsavedChanges(() => get(FileModified));
+// window.api.queryUnsavedChanges(() => fileModified.value);

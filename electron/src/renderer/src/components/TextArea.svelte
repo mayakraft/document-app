@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Model } from "../stores/Model.ts";
-	import { FileModified } from "../stores/File.ts";
+	import { model } from "../stores/model.svelte.ts";
+	import { fileModified } from "../stores/file.svelte.ts";
 
-	const oninput = () => $FileModified = true;
+	const oninput = () => fileModified.value = true;
 </script>
 
-<textarea bind:value={$Model} {oninput}></textarea>
+<textarea bind:value={model.value} {oninput}></textarea>
 
 <style>
 	textarea {
