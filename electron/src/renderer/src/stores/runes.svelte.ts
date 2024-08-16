@@ -1,7 +1,7 @@
 /**
- * @description create and return a writable Svelte store
+ * @description create and return a writable Svelte rune
  */
-export const createStore = <T>(val?: T) => {
+export const createSignal = <T>(val?: T) => {
 	let value = $state(val);
 	return {
 		get value(): T {

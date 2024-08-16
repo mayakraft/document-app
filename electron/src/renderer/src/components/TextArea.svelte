@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { model } from "../stores/model.svelte.ts";
-	import { fileModified } from "../stores/file.svelte.ts";
+	import { setFileModified } from "../stores/file.svelte.ts";
 
-	const oninput = () => fileModified.value = true;
+	const oninput = () => setFileModified(true);
 </script>
 
 <textarea bind:value={model.value} {oninput}></textarea>

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { fileDropDidUpdate } from "../interface.ts";
+	import { fileDropDidUpdate } from "../interface.svelte.ts";
 
 	let isHovering = $state(false);
 

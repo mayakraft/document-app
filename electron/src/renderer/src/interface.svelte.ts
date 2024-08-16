@@ -1,5 +1,5 @@
 import { model } from "./stores/model.svelte.ts";
-import { fileModified, fileInfo } from "./stores/file.svelte.ts";
+import { getFileModified, setFileModified, fileInfo } from "./stores/file.svelte.ts";
 import { DOCUMENT_EXTENSION, UNTITLED_FILENAME } from "../../general/constants.ts";
 import { type FilePathInfo } from "../../general/types.ts";
 
@@ -19,7 +19,7 @@ let quitInProgress = false;
  */
 export const quitApp = async () => {
 	// console.log("quit app request");
-	if (fileModified.value) {
+	if (getFileModified()) {
 		const { response } = await window.api.unsavedChangesDialog();
 		if (response !== 0) {
 			return;
@@ -36,7 +36,7 @@ export const quitApp = async () => {
  * with the model (on the front-end) whether or not there are unsaved changes.
  */
 export const newFile = async () => {
-	if (fileModified.value) {
+	if (getFileModified()) {
 		const { response } = await window.api.unsavedChangesDialog("New File", "Cancel");
 		if (response !== 0) {
 			return;
@@ -50,7 +50,7 @@ export const newFile = async () => {
 		root: "untitled",
 		extension: `.${DOCUMENT_EXTENSION}`,
 	};
-	fileModified.value = false;
+	setFileModified(false);
 };
 
 /**
@@ -60,7 +60,7 @@ export const newFile = async () => {
  * with the model (on the front-end) whether or not there are unsaved changes.
  */
 export const openFile = async () => {
-	if (fileModified.value) {
+	if (getFileModified()) {
 		const { response } = await window.api.unsavedChangesDialog("Proceed", "Cancel");
 		if (response !== 0) {
 			return;
@@ -71,7 +71,7 @@ export const openFile = async () => {
 	if (info) {
 		model.value = data;
 		fileInfo.value = info;
-		fileModified.value = false;
+		setFileModified(false);
 	}
 };
 
@@ -82,9 +82,10 @@ export const openFile = async () => {
 export const saveFile = async () => {
 	// fileInfo.value is an object and a Proxy (due to Svelte 5), this method
 	// will attempt to clone it, can't clone a proxy, so we shallow copy.
-	const success = await window.api.saveFile({ ...fileInfo.value }, model.value);
+	// const success = await window.api.saveFile({ ...fileInfo.value }, model.value);
+	const success = await window.api.saveFile($state.snapshot(fileInfo.value), model.value);
 	if (success) {
-		fileModified.value = false;
+		setFileModified(false);
 	} else {
 		saveFileAs();
 	}
@@ -98,7 +99,7 @@ export const saveFileAs = async () => {
 	const info = await window.api.saveFileAs(model.value);
 	if (info) {
 		fileInfo.value = info;
-		fileModified.value = false;
+		setFileModified(false);
 	}
 };
 
@@ -115,7 +116,7 @@ export const fileDropDidUpdate = async (event: DragEvent) => {
 		if (event.target && event.target.result && typeof event.target.result === "string") {
 			model.value = event.target.result;
 			fileInfo.value = info;
-			fileModified.value = false;
+			setFileModified(false);
 		}
 	};
 
@@ -146,7 +147,7 @@ export const fileDropDidUpdate = async (event: DragEvent) => {
  * This will prompt the user if there are unsaved changes.
  */
 window.addEventListener("beforeunload", (event) => {
-	if (!fileModified.value || quitInProgress) {
+	if (!getFileModified() || quitInProgress) {
 		return;
 	}
 	event.preventDefault();

@@ -4,7 +4,7 @@
 		openFile,
 		saveFile,
 		saveFileAs,
-	} from "../interface.ts";
+	} from "../interface.svelte.ts";
 </script>
 
 <div>
