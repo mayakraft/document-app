@@ -7,9 +7,9 @@
  * @description Verbose file path information
  */
 export type FilePathInfo = {
-	fullpath: string; // "/Users/Maya/Documents/notes.txt"
-	directory: string; // "/Users/Maya/Documents" (without a final slash /)
-	file: string; // "notes.txt"
-	root: string; // "notes"
-	extension: string; // ".txt"
-};
+  fullpath: string; // "/Users/Maya/Documents/notes.txt"
+  directory: string; // "/Users/Maya/Documents" (without a final slash /)
+  file: string; // "notes.txt"
+  root: string; // "notes"
+  extension: string; // ".txt"
+}

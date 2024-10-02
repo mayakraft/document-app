@@ -5,7 +5,7 @@ import { createSignal } from "./runes.svelte";
  * this is one level of abstraction away from the raw byte contents of a file,
  * because this app only ever uses files which are text files.
  */
-export const model = createSignal();
+export const model = createSignal<string>();
 
 // export let makeModel = (val?: string) => {
 // 	let value = $state(val);

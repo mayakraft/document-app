@@ -15,10 +15,10 @@ export const fileInfo = createSignal<FilePathInfo>();
  */
 // export const fileModified = createSignal<boolean>(false);
 let fileModified = $state<boolean>(false);
-export let setFileModified = (v: boolean) => {
-	fileModified = v;
+export const setFileModified = (v: boolean) => {
+  fileModified = v;
 };
-export let getFileModified = () => fileModified;
+export const getFileModified = () => fileModified;
 
 // export const setFileModified = (value: boolean) => {
 // 	fileModified = value;
@@ -30,9 +30,9 @@ export let getFileModified = () => fileModified;
  * to include the currently opened filename.
  */
 const appTitle = $derived.by<string>(() => {
-	const displayName = fileInfo.value === undefined ? UNTITLED_FILENAME : fileInfo.value.file;
-	const savedIndicator = fileModified ? " *" : "";
-	return `${APP_NAME} - ${displayName}${savedIndicator}`;
+  const displayName = fileInfo.value === undefined ? UNTITLED_FILENAME : fileInfo.value.file;
+  const savedIndicator = fileModified ? " *" : "";
+  return `${APP_NAME} - ${displayName}${savedIndicator}`;
 });
 
 export const getAppTitle = () => appTitle;

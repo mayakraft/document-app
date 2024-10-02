@@ -11,16 +11,16 @@ import { getFilePathInfo, validateFileType } from "./filesystem.ts";
  */
 
 export const unsavedChangesDialog = (
-	_: IpcMainInvokeEvent,
-	yesString: string = "Proceed",
-	noString: string = "Cancel",
+  _: IpcMainInvokeEvent,
+  yesString: string = "Proceed",
+  noString: string = "Cancel",
 ) =>
-	dialog.showMessageBox({
-		message: "You have unsaved progress",
-		title: "Are you sure?",
-		type: "question",
-		buttons: [yesString, noString],
-	});
+  dialog.showMessageBox({
+    message: "You have unsaved progress",
+    title: "Are you sure?",
+    type: "question",
+    buttons: [yesString, noString],
+  });
 
 /**
  *
@@ -28,8 +28,8 @@ export const unsavedChangesDialog = (
 export const pathJoin = (_: IpcMainInvokeEvent, ...paths: string[]) => path.join(...paths);
 
 export const makeFilePathInfo = async (
-	_: IpcMainInvokeEvent,
-	filePath: string,
+  _: IpcMainInvokeEvent,
+  filePath: string,
 ): Promise<FilePathInfo> => getFilePathInfo(filePath);
 
 /**
@@ -37,46 +37,46 @@ export const makeFilePathInfo = async (
  * to open an open file dialog.
  */
 export const openFile = async (
-	_: IpcMainInvokeEvent,
+  _: IpcMainInvokeEvent,
 ): Promise<{ data?: string; fileInfo?: FilePathInfo }> => {
-	const { canceled, filePaths } = await dialog.showOpenDialog({
-		properties: ["openFile"],
-	});
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    properties: ["openFile"],
+  });
 
-	if (canceled) {
-		return {};
-	}
-	// hardcoded ignoring more than 1 file
-	const filePath = filePaths[0];
-	const fileInfo = await getFilePathInfo(filePath);
-	if (!(await validateFileType(fileInfo))) {
-		return {};
-	}
-	const data = await fs.readFile(filePath, { encoding: "utf-8" });
-	return { fileInfo, data };
+  if (canceled) {
+    return {};
+  }
+  // hardcoded ignoring more than 1 file
+  const filePath = filePaths[0];
+  const fileInfo = await getFilePathInfo(filePath);
+  if (!(await validateFileType(fileInfo))) {
+    return {};
+  }
+  const data = await fs.readFile(filePath, { encoding: "utf-8" });
+  return { fileInfo, data };
 };
 
 /**
  * @description Perform a "SaveAs" operation for the currently opened file.
  */
 export const saveFileAs = async (
-	_: IpcMainInvokeEvent,
-	data: string,
+  _: IpcMainInvokeEvent,
+  data: string,
 ): Promise<FilePathInfo | undefined> => {
-	const defaultPath = app.getPath("home");
-	const filters = [
-		{
-			name: DOCUMENT_TYPE_NAME,
-			extensions: [DOCUMENT_EXTENSION],
-		},
-	];
-	const options = !defaultPath || defaultPath === "" ? { filters } : { filters, defaultPath };
-	const { canceled, filePath } = await dialog.showSaveDialog(options);
-	if (canceled) {
-		return undefined;
-	}
-	await fs.writeFile(filePath, data);
-	return getFilePathInfo(filePath);
+  const defaultPath = app.getPath("home");
+  const filters = [
+    {
+      name: DOCUMENT_TYPE_NAME,
+      extensions: [DOCUMENT_EXTENSION],
+    },
+  ];
+  const options = !defaultPath || defaultPath === "" ? { filters } : { filters, defaultPath };
+  const { canceled, filePath } = await dialog.showSaveDialog(options);
+  if (canceled) {
+    return undefined;
+  }
+  await fs.writeFile(filePath, data);
+  return getFilePathInfo(filePath);
 };
 
 /**
@@ -88,20 +88,21 @@ export const saveFileAs = async (
  * run the "saveAs" method.
  */
 export const saveFile = async (
-	_: IpcMainInvokeEvent,
-	fileInfo: FilePathInfo,
-	data: string,
+  _: IpcMainInvokeEvent,
+  fileInfo: FilePathInfo,
+  data: string,
 ): Promise<boolean> => {
-	// a couple checks to REALLY make sure that the file already exists
-	if (!fileInfo || !fileInfo.fullpath) {
-		return false;
-	}
-	return fs
-		.access(fileInfo.fullpath, fs.constants.F_OK)
-		.catch(() => false)
-		.then(async () => {
-			// save file and overwrite contents
-			await fs.writeFile(fileInfo.fullpath, data);
-			return true;
-		});
+  // a couple checks to REALLY make sure that the file already exists
+  if (!fileInfo || !fileInfo.fullpath) {
+    return false;
+  }
+  return fs
+    .access(fileInfo.fullpath, fs.constants.F_OK)
+    .catch(() => false)
+    .then(async () => {
+      // save file and overwrite contents
+      await fs.writeFile(fileInfo.fullpath, data);
+      return true;
+    });
 };
+

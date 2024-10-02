@@ -9,10 +9,11 @@ import { BrowserWindow, IpcMainEvent } from "electron";
  *
  */
 export const setAppTitle = (event: IpcMainEvent, title: string) => {
-	const webContents = event.sender;
-	const win = BrowserWindow.fromWebContents(webContents);
-	if (!win) {
-		return;
-	}
-	win.setTitle(title);
+  const webContents = event.sender;
+  const win = BrowserWindow.fromWebContents(webContents);
+  if (!win) {
+    return;
+  }
+  win.setTitle(title);
 };
+
