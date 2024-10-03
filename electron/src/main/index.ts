@@ -3,7 +3,7 @@ import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import { join } from "node:path";
 import icon from "../../resources/icon.png?asset";
 import { makeTemplate } from "./menu.ts";
-import { setAppTitle } from "./mainEvents.ts";
+import { setAppTitle } from "./oneWayEvents.ts";
 import {
   openFile,
   saveFile,
@@ -11,7 +11,7 @@ import {
   pathJoin,
   makeFilePathInfo,
   unsavedChangesDialog,
-} from "./invokeEvents.ts";
+} from "./twoWayEvents.ts";
 
 // ipcMain sends signal from main to the renderer
 
@@ -105,3 +105,4 @@ app.whenReady().then(() => {
   // // 3rd to fire upon quit
   // app.on("quit", (event) => {});
 });
+

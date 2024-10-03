@@ -1,5 +1,5 @@
 import { ipcRenderer } from "electron";
-import type { FilePathInfo } from "../main/filesystem.ts";
+import type { FilePathInfo } from "../main/fs/path.ts";
 
 export type WindowAPI = {
   // one way, from renderer to main

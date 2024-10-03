@@ -1,6 +1,14 @@
 import { contextBridge } from "electron";
-import { electronAPI } from "@electron-toolkit/preload";
+import { type ElectronAPI, electronAPI } from "@electron-toolkit/preload";
+import type { WindowAPI } from "../preload/api.ts";
 import { api } from "./api.ts";
+
+declare global {
+  interface Window {
+    electron: ElectronAPI;
+    api: WindowAPI;
+  }
+}
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
@@ -13,9 +21,7 @@ if (process.contextIsolated) {
     console.error(error);
   }
 } else {
-  // @ts-expect-error (defined in .d.ts)
   window.electron = electronAPI;
-  // @ts-expect-error (defined in .d.ts)
   window.api = api;
 }
 

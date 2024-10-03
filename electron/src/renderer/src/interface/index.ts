@@ -1,15 +1,7 @@
-import type { WindowAPI } from "../../../preload/api.ts";
 import { quitApp } from "./quit.svelte.ts";
 import { newFile } from "./newFile.svelte.ts";
 import { openFile } from "./openFile.svelte.ts";
 import { saveFile, saveFileAs } from "./saveFile.svelte.ts";
-
-// todo: this is duplicated. I can't get it to recognize the definition from the other file.
-declare global {
-  interface Window {
-    api: WindowAPI;
-  }
-}
 
 /**
  * bind all methods for the from-main-to-renderer IPC communication.

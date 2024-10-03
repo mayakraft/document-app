@@ -1,72 +1,72 @@
-import { dialog } from "electron";
+import { app, dialog } from "electron";
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import { DOCUMENT_EXTENSION, DOCUMENT_TYPE_NAME } from "../../global/constants.ts";
+import { type FilePathInfo, getFilePathInfo } from "./path.ts";
+import { validateFileType } from "./validate.ts";
 
 /**
- * @description Verbose file path information
+ * @description Perform an "Open File" operation, which tells the system
+ * to open an open file dialog.
  */
-export type FilePathInfo = {
-  fullpath: string; // "/Users/Maya/Documents/notes.txt"
-  directory: string; // "/Users/Maya/Documents" (without a final slash /)
-  file: string; // "notes.txt"
-  root: string; // "notes"
-  extension: string; // ".txt"
+export const openFile = async (): Promise<{ data?: string; fileInfo?: FilePathInfo }> => {
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    properties: ["openFile"],
+  });
+  if (canceled) {
+    return {};
+  }
+  // hardcoded ignoring more than 1 file
+  const filePath = filePaths[0];
+  const fileInfo = await getFilePathInfo(filePath);
+  if (!(await validateFileType(fileInfo))) {
+    return {};
+  }
+  const data = await fs.readFile(filePath, { encoding: "utf-8" });
+  return { fileInfo, data };
 };
 
 /**
- * @description Pick apart a file path into useful parts
+ * @description Perform a "SaveAs" operation for the currently opened file.
  */
-export const getFilePathInfo = async (filePath: string): Promise<FilePathInfo> => {
-  // compute everything inside of individual try catches.
-  // for example if the file has no extension, the extname() function
-  // will throw an error, in which case, we still want to get the other data.
-  let fullpath = "";
-  let directory = "";
-  let file = "";
-  let root = "";
-  let extension = "";
-
-  // resolve the user's "filePath" into an absolute path
-  try {
-    fullpath = path.resolve(filePath);
-  } catch (e) {
-    // ignore
+export const saveFileAs = async (data: string): Promise<FilePathInfo | undefined> => {
+  const defaultPath = app.getPath("home");
+  const filters = [
+    {
+      name: DOCUMENT_TYPE_NAME,
+      extensions: [DOCUMENT_EXTENSION],
+    },
+  ];
+  const options = !defaultPath || defaultPath === "" ? { filters } : { filters, defaultPath };
+  const { canceled, filePath } = await dialog.showSaveDialog(options);
+  if (canceled) {
+    return undefined;
   }
+  await fs.writeFile(filePath, data);
+  return getFilePathInfo(filePath);
+};
 
-  // get the directory containing the file
-  try {
-    directory = path.dirname(fullpath);
-  } catch (e) {
-    // ignore
+/**
+ * @description Perform a "Save" operation for the currently opened file.
+ * if the file exists it will be overwritten,
+ * if the file does not exist it will be silently created then written to.
+ * returns true if the write was successful
+ * returns false if the write was unsuccessful, it might be customary to
+ * run the "saveAs" method.
+ */
+export const saveFile = async (fileInfo: FilePathInfo, data: string): Promise<boolean> => {
+  // a couple checks to REALLY make sure that the file already exists
+  if (!fileInfo || !fileInfo.fullpath) {
+    return false;
   }
-
-  // get the basename of the file (name + extension), and for now,
-  // set the "name" entry to be this, in the case that the file has no
-  // extension, the following calls might not work.
-  try {
-    file = path.basename(fullpath);
-    root = file;
-  } catch (e) {
-    // ignore
-  }
-
-  // get the extension of the file, the portion after the final "."
-  try {
-    extension = path.extname(fullpath);
-  } catch (e) {
-    // ignore
-  }
-  // parse the file and get the name of the file excluding the . and extension
-
-  try {
-    const rootmatch = file.match(/(.*)\.[^.]+$/);
-    if (rootmatch && rootmatch.length > 1) {
-      root = rootmatch[1];
-    }
-  } catch (e) {
-    // ignore
-  }
-  return { fullpath, directory, file, root, extension };
+  return fs
+    .access(fileInfo.fullpath, fs.constants.F_OK)
+    .catch(() => false)
+    .then(async () => {
+      // save file and overwrite contents
+      await fs.writeFile(fileInfo.fullpath, data);
+      return true;
+    });
 };
 
 /**
@@ -157,23 +157,3 @@ export const exportBinaryFiles = async (
   });
 };
 
-/**
- *
- */
-export const validateFileType = async (fileInfo: FilePathInfo): Promise<boolean> => {
-  // list all supported extensions here
-  switch (fileInfo.extension.toLowerCase()) {
-    case "": // files without an extension might appear here?
-    case ".js":
-    case ".json":
-    case ".txt":
-      return true;
-    default:
-      await dialog.showMessageBox({
-        message: `${fileInfo.extension} file type not supported`,
-        title: "Unknown File Type",
-        type: "error",
-      });
-      return false;
-  }
-};
