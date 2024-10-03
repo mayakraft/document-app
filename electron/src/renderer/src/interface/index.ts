@@ -1,4 +1,4 @@
-import type { WindowAPI } from "../../../general/types.ts";
+import type { WindowAPI } from "../../../preload/api.ts";
 import { quitApp } from "./quit.svelte.ts";
 import { newFile } from "./newFile.svelte.ts";
 import { openFile } from "./openFile.svelte.ts";

@@ -1,4 +1,4 @@
-import { APP_NAME, UNTITLED_FILENAME } from "../../../general/constants.ts";
+import { APP_NAME, UNTITLED_FILENAME } from "../../../global/constants.ts";
 import file from "./file.svelte.ts";
 
 /**

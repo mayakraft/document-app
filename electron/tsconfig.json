@@ -1,6 +1,6 @@
 {
   "include": [
-    "src/general/**/*",
+    "src/global/**/*",
     "src/renderer/src/env.d.ts",
     "src/renderer/src/**/*",
     "src/renderer/src/**/*.svelte",

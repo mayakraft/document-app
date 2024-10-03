@@ -1,9 +1,8 @@
 import { app, dialog, IpcMainInvokeEvent } from "electron";
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { DOCUMENT_EXTENSION, DOCUMENT_TYPE_NAME } from "../general/constants.ts";
-import { type FilePathInfo } from "../general/types.ts";
-import { getFilePathInfo, validateFileType } from "./filesystem.ts";
+import { DOCUMENT_EXTENSION, DOCUMENT_TYPE_NAME } from "../global/constants.ts";
+import { type FilePathInfo, getFilePathInfo, validateFileType } from "./filesystem.ts";
 
 /**
  * these are the two-way renderer-to-main-and-back events which use

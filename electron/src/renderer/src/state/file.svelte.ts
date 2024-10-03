@@ -1,4 +1,4 @@
-import type { FilePathInfo } from "../../../general/types.ts";
+import type { FilePathInfo } from "../../../main/filesystem.ts";
 
 //const emptyFilePathInfo = () => ({
 //  fullpath: "",

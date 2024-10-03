@@ -1,6 +1,6 @@
 import { model } from "../state/model.svelte.ts";
 import file from "../state/file.svelte.ts";
-import { DOCUMENT_EXTENSION, UNTITLED_FILENAME } from "../../../general/constants.ts";
+import { DOCUMENT_EXTENSION, UNTITLED_FILENAME } from "../../../global/constants.ts";
 
 /**
  * @description ask the app to create a new file.

@@ -1,5 +1,5 @@
 import { ElectronAPI } from "@electron-toolkit/preload";
-import type { WindowAPI } from "../general/types.ts";
+import type { WindowAPI } from "../preload/api.ts";
 
 declare global {
   interface Window {

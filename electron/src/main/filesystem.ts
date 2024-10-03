@@ -1,7 +1,17 @@
 import { dialog } from "electron";
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import type { FilePathInfo } from "../general/types.ts";
+
+/**
+ * @description Verbose file path information
+ */
+export type FilePathInfo = {
+  fullpath: string; // "/Users/Maya/Documents/notes.txt"
+  directory: string; // "/Users/Maya/Documents" (without a final slash /)
+  file: string; // "notes.txt"
+  root: string; // "notes"
+  extension: string; // ".txt"
+};
 
 /**
  * @description Pick apart a file path into useful parts
@@ -65,7 +75,7 @@ export const getFilePathInfo = async (filePath: string): Promise<FilePathInfo> =
  * that counts up from 0 to "count" - 1, and 000N will have the minimum
  * number of preceding zeros to pad all numbers to be the same length.
  */
-const makeNumberedFilenames = (count: number, name: string, extension: string) => {
+const makeNumberedFilenames = (count: number, name: string, extension: string): string[] => {
   const places = count.toString().length;
   const zeros = Array(places).fill(0).join("");
   return Array.from(Array(count))
