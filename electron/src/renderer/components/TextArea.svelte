@@ -2,7 +2,9 @@
   import { model } from "../state/model.svelte.ts";
   import file from "../state/file.svelte.ts";
 
-  const oninput = () => (file.modified = true);
+  const oninput = (): void => {
+    file.modified = true;
+  };
 </script>
 
 <textarea bind:value={model.value} {oninput}></textarea>

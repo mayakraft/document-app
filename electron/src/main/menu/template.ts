@@ -1,21 +1,10 @@
 import { app, BrowserWindow, type MenuItemConstructorOptions } from "electron";
 
 export const makeTemplate = (window: BrowserWindow): MenuItemConstructorOptions[] => {
-  const send = (channel: string, ...args: any[]) => {
-    // check if window.webContents exists.
-    // if not, search other windows for the correct "main" window.
-    // todo: unfortunately this does not solve the issue.
-    if (!window || !window.webContents || !window.webContents.send) {
-      console.log("menu does not exist");
-      // let count = BrowserWindow.getAllWindows()
-      // .filter(b => {
-      //   return b.isVisible()
-      // })
-      // .length
-      return;
-    }
-    window.webContents.send(channel, ...args);
-  };
+  const send = (channel: string, ...args: string[]): void =>
+    window && window.webContents && window.webContents.send
+      ? window.webContents.send(channel, ...args)
+      : undefined;
   return [
     {
       label: app.name,

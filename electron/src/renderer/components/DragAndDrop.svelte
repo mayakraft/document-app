@@ -3,22 +3,22 @@
 
   let isHovering = $state(false);
 
-  const ondragenter = (e: DragEvent) => {
+  const ondragenter = (e: DragEvent): void => {
     e.preventDefault();
     isHovering = true;
   };
 
-  const ondragleave = (e: DragEvent) => {
+  const ondragleave = (e: DragEvent): void => {
     e.preventDefault();
     isHovering = false;
   };
 
-  const ondragover = (e: DragEvent) => {
+  const ondragover = (e: DragEvent): void => {
     e.preventDefault();
     isHovering = true;
   };
 
-  const ondrop = (event: DragEvent) => {
+  const ondrop = (event: DragEvent): void => {
     event.preventDefault();
     event.stopPropagation();
     isHovering = false;

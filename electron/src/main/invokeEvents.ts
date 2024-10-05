@@ -1,5 +1,5 @@
 import path from "node:path";
-import { type IpcMainInvokeEvent } from "electron";
+import type { MessageBoxReturnValue, IpcMainInvokeEvent } from "electron";
 import { type FilePathInfo, getFilePathInfo } from "./fs/path.ts";
 import {
   openFile as fsOpenFile,
@@ -13,13 +13,14 @@ import { unsavedChanges } from "./dialog/dialogs.ts";
  * ipcRenderer.invoke() and ipcMain.handle()
  */
 
-export const pathJoin = (_: IpcMainInvokeEvent, ...paths: string[]) => path.join(...paths);
+export const pathJoin = (_: IpcMainInvokeEvent, ...paths: string[]): string =>
+  path.join(...paths);
 
 export const unsavedChangesDialog = (
   _: IpcMainInvokeEvent,
   yesString: string = "Proceed",
   noString: string = "Cancel",
-) => unsavedChanges(yesString, noString);
+): Promise<MessageBoxReturnValue> => unsavedChanges(yesString, noString);
 
 export const makeFilePathInfo = async (
   _: IpcMainInvokeEvent,
@@ -40,4 +41,3 @@ export const saveFile = async (
   fileInfo: FilePathInfo,
   data: string,
 ): Promise<boolean> => fsSaveFile(fileInfo, data);
-

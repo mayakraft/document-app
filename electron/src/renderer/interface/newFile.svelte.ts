@@ -1,6 +1,6 @@
 import { model } from "../state/model.svelte.ts";
 import file from "../state/file.svelte.ts";
-import { DOCUMENT_EXTENSION, UNTITLED_FILENAME } from "../../../global/constants.ts";
+import { EXTENSION, UNTITLED_FILENAME } from "../state/app.svelte.ts";
 
 /**
  * @description ask the app to create a new file.
@@ -8,7 +8,7 @@ import { DOCUMENT_EXTENSION, UNTITLED_FILENAME } from "../../../global/constants
  * The request must pass through the front end because we need to check
  * with the model (on the front-end) whether or not there are unsaved changes.
  */
-export const newFile = async () => {
+export const newFile = async (): Promise<void> => {
   if (file.modified) {
     const { response } = await window.api.unsavedChangesDialog("New File", "Cancel");
     if (response !== 0) {
@@ -21,8 +21,7 @@ export const newFile = async () => {
     directory: "",
     file: UNTITLED_FILENAME,
     root: "untitled",
-    extension: `.${DOCUMENT_EXTENSION}`,
+    extension: `.${EXTENSION}`,
   };
   file.modified = false;
 };
-

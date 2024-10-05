@@ -5,7 +5,7 @@ import { BrowserWindow, type IpcMainEvent } from "electron";
  * ipcRenderer.send() and ipcMain.on()
  */
 
-export const setAppTitle = (event: IpcMainEvent, title: string) => {
+export const setAppTitle = (event: IpcMainEvent, title: string): void => {
   const webContents = event.sender;
   const win = BrowserWindow.fromWebContents(webContents);
   if (!win) {
@@ -13,4 +13,3 @@ export const setAppTitle = (event: IpcMainEvent, title: string) => {
   }
   win.setTitle(title);
 };
-

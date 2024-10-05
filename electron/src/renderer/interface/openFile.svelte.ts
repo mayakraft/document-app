@@ -7,7 +7,7 @@ import file from "../state/file.svelte.ts";
  * The request must pass through the front end because we need to check
  * with the model (on the front-end) whether or not there are unsaved changes.
  */
-export const openFile = async () => {
+export const openFile = async (): Promise<void> => {
   if (file.modified) {
     const { response } = await window.api.unsavedChangesDialog("Proceed", "Cancel");
     if (response !== 0) {
@@ -22,4 +22,3 @@ export const openFile = async () => {
     file.modified = false;
   }
 };
-

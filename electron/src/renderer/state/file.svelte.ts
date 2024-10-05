@@ -1,4 +1,4 @@
-import type { FilePathInfo } from "../../../main/filesystem.ts";
+import type { FilePathInfo } from "../../main/fs/path.ts";
 
 //const emptyFilePathInfo = () => ({
 //  fullpath: "",
@@ -16,4 +16,3 @@ class File {
 }
 
 export default new File();
-

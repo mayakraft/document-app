@@ -14,7 +14,7 @@ let quitInProgress = false;
  * The request must pass through the front end because we need to check
  * with the model (on the front-end) whether or not there are unsaved changes.
  */
-export const quitApp = async () => {
+export const quitApp = async (): Promise<void> => {
   // console.log("quit app request");
   if (file.modified) {
     const { response } = await window.api.unsavedChangesDialog();
@@ -45,4 +45,3 @@ window.addEventListener("beforeunload", (event) => {
     }
   });
 });
-
