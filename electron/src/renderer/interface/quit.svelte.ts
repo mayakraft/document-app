@@ -1,4 +1,5 @@
 import file from "../state/file.svelte.ts";
+import { saveFileAs } from "./saveFile.svelte.ts";
 
 /**
  * @description methods available to both the front and back ends.
@@ -17,8 +18,17 @@ let quitInProgress = false;
 export const quitApp = async (): Promise<void> => {
   // console.log("quit app request");
   if (file.modified) {
+    // 0: "yes", 1: "cancel", 2: "no"
     const { response } = await window.api.unsavedChangesDialog();
-    if (response !== 0) {
+    if (response === 0) {
+      const info = await saveFileAs();
+      // save was cancelled
+      if (info === undefined) {
+        return;
+      }
+      console.log(info);
+    }
+    if (response === 1) {
       return;
     }
   }
@@ -38,9 +48,22 @@ window.addEventListener("beforeunload", (event) => {
   // https://github.com/electron/electron/issues/7977
   event.returnValue = false;
   setTimeout(async () => {
+    // 0: "yes", 1: "cancel", 2: "no"
     const { response } = await window.api.unsavedChangesDialog();
-    quitInProgress = response === 0;
+    quitInProgress = response === 2;
     if (response === 0) {
+      // set quitInProgress based on the result of saveFileAs
+      const info = await saveFileAs();
+      console.log(info);
+      if (info === undefined) {
+        // save was cancelled
+        return;
+      } else {
+        // save successful
+        window.api.quitApp();
+      }
+    }
+    if (response === 2) {
       window.api.quitApp();
     }
   });

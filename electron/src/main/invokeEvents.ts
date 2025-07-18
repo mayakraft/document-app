@@ -18,9 +18,10 @@ export const pathJoin = (_: IpcMainInvokeEvent, ...paths: string[]): string =>
 
 export const unsavedChangesDialog = (
   _: IpcMainInvokeEvent,
-  yesString: string = "Proceed",
-  noString: string = "Cancel",
-): Promise<MessageBoxReturnValue> => unsavedChanges(yesString, noString);
+  yesString: string = "Yes",
+  noString: string = "No",
+  cancelString: string = "Cancel",
+): Promise<MessageBoxReturnValue> => unsavedChanges(yesString, noString, cancelString);
 
 export const makeFilePathInfo = async (
   _: IpcMainInvokeEvent,

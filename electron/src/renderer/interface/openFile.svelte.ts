@@ -1,5 +1,6 @@
 import { model } from "../state/model.svelte.ts";
 import file from "../state/file.svelte.ts";
+import { saveFileAs } from "./saveFile.svelte.ts";
 
 /**
  * @description ask the app to open a new file, replacing the current one.
@@ -9,9 +10,14 @@ import file from "../state/file.svelte.ts";
  */
 export const openFile = async (): Promise<void> => {
   if (file.modified) {
-    const { response } = await window.api.unsavedChangesDialog("Proceed", "Cancel");
-    if (response !== 0) {
+    // 0: "yes", 1: "cancel", 2: "no"
+    const { response } = await window.api.unsavedChangesDialog("Yes", "No", "Cancel");
+    if (response === 1) {
       return;
+    }
+    if (response === 0) {
+      // request to save
+      await saveFileAs();
     }
   }
 

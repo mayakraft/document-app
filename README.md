@@ -6,6 +6,32 @@ This project exists in two implementations, one in [Electron](https://www.electr
 
 Use this as a foundation and build your app on top of it.
 
+# Usage
+
+The designated file type is .txt.
+
+If the file is modified but not yet saved, the app is meant to behave in the expected manner, for example, warning you before quitting. Specifically here are some things to test and ensure work. In all cases, there are two ways of quitting:
+
+- File Menu -> Quit or CMD/CTRL+Q (these trigger the same effect)
+- Pressing the X button (Windows/Linux) or red circle (Macos/Linux)
+
+Things to test (each should be tested by triggering both types of quit)
+
+- quitting after opening the app, or when the file has just been saved should quit immediately.
+- quitting with a modified file triggers the "would you like to save" query.
+- "would you like to save" selecting "cancel" should return you to the app
+- "would you like to save" selecting "no" should quit the app
+- "would you like to save" selecting "yes" should open the file save dialog
+- "would you like to save" selecting "yes", then cancelling the file save dialog should return you to the app
+- "would you like to save" selecting "yes", then saving a file should quit the app
+
+Then there is another sequence where a file is modified and the user triggers a "new" file, or opening a new file. Opening a new file can happen two ways:
+
+- File Menu -> Open or CMD/CTRL+O (these trigger the same effect)
+- Dragging and dropping a file into the app window
+
+In this case, test the same series of tests as the list above.
+
 # Developers
 
 ```bash

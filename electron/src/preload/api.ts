@@ -1,15 +1,23 @@
 import { ipcRenderer } from "electron";
 import type { FilePathInfo } from "../main/fs/path.ts";
 
+// this list should reflect the binding that occurs inside src/main/index.ts,
+// with invokeEvents and onEvents function bindings.
+
 export type WindowAPI = {
   // one way, from renderer to main
   quitApp: () => void;
   setAppTitle: (title: string) => void;
 
+  // get the app bundle's directory
+  // (not the location of the executable)
+  getBaseDirectory: () => Promise<string>;
+
   // two way, from renderer to main and back
   unsavedChangesDialog: (
     yesString?: string,
     noString?: string,
+    cancelString?: string,
   ) => Promise<{ response: number }>;
   pathJoin: () => Promise<string>;
   openFile: () => Promise<{ data?: string; fileInfo?: FilePathInfo }>;
@@ -33,9 +41,13 @@ export const api: WindowAPI = {
   quitApp: () => ipcRenderer.send("quitApp"),
   setAppTitle: (title: string) => ipcRenderer.send("setAppTitle", title),
 
+  // get the app bundle's directory
+  // (not the location of the executable)
+  getBaseDirectory: () => ipcRenderer.invoke("getBaseDirectory"),
+
   // two way, front to back with a response
-  unsavedChangesDialog: (yesString?: string, noString?: string) =>
-    ipcRenderer.invoke("unsavedChangesDialog", yesString, noString),
+  unsavedChangesDialog: (yesString?: string, noString?: string, cancelString?: string) =>
+    ipcRenderer.invoke("unsavedChangesDialog", yesString, noString, cancelString),
   openFile: () => ipcRenderer.invoke("openFile"),
   saveFile: (fileInfo: FilePathInfo, data: string) =>
     ipcRenderer.invoke("saveFile", fileInfo, data),
