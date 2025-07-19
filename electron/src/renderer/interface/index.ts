@@ -14,10 +14,9 @@ declare global {
 /**
  * bind all methods for the from-main-to-renderer IPC communication.
  */
-window.api.bindIpcRendererOn("menuQuit", quitApp);
-window.api.bindIpcRendererOn("menuNew", newFile);
-window.api.bindIpcRendererOn("menuOpen", openFile);
-window.api.bindIpcRendererOn("menuSave", saveFile);
-window.api.bindIpcRendererOn("menuSaveAs", saveFileAs);
-
+window.api.menuPressNew(newFile);
+window.api.menuPressOpen(openFile);
+window.api.menuPressSave(saveFile);
+window.api.menuPressSaveAs(saveFileAs);
+window.api.menuPressQuit(quitApp);
 // window.api.queryUnsavedChanges(() => fileModified.value);
