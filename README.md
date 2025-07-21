@@ -6,6 +6,12 @@ This project exists in two implementations, one in [Electron](https://www.electr
 
 Use this as a foundation and build your app on top of it.
 
+# implementation
+
+The two repos (Electron and Tauri) are intended to be as close to the same app as possible. The front ends are more similar, the back ends differ heavily, and there are some differences regarding IPC (inter-process communication).
+
+- no interface/index.ts in Tauri
+
 # Usage
 
 The designated file type is .txt.

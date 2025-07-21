@@ -1,24 +1,27 @@
 <script lang="ts">
-	import { Model } from "../stores/Model.ts";
-	import { FileModified } from "../stores/FileModified.ts";
+  import { model } from "../state/model.svelte.ts";
+  import file from "../state/file.svelte.ts";
 
-	const oninput = () => $FileModified = true;
+  const oninput = (): void => {
+    file.modified = true;
+  };
 </script>
 
-<textarea bind:value={$Model} {oninput}></textarea>
+<textarea bind:value={model.value} {oninput}></textarea>
 
 <style>
-	textarea {
-		font-family: monospace;
-		color: #D7D9DA;
-		width: 80%;
-		min-height: 15rem;
-		resize: vertical;
-		font-size: 1rem;
-		padding: 1rem;
-		border: 2px solid #555;
-		border-radius: 0.5rem;
-		background-color: #2b2a33;
-		outline: none;
-	}
+  textarea {
+    font-family: monospace;
+    color: #d7d9da;
+    width: 80%;
+    min-height: 15rem;
+    resize: vertical;
+    font-size: 1rem;
+    padding: 1rem;
+    border: 2px solid #555;
+    border-radius: 0.5rem;
+    background-color: #2b2a33;
+    outline: none;
+  }
 </style>
+
