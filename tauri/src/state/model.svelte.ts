@@ -1,7 +1,7 @@
 /**
- * @description create and return a writable Svelte rune
+ * @description create and return an exportable writable Svelte rune
  */
-export const createSignal = <T>(val?: T): { value: T } => {
+export const createSignal = <T>(val: T): { value: T } => {
   let value = $state(val);
   return {
     get value(): T {
@@ -18,4 +18,4 @@ export const createSignal = <T>(val?: T): { value: T } => {
  * this is one level of abstraction away from the raw byte contents of a file,
  * because this app only ever uses files which are text files.
  */
-export const model = createSignal<string>();
+export const model = createSignal<string>("");

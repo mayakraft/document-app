@@ -1,7 +1,10 @@
+import { family } from "@tauri-apps/plugin-os";
 import {
+  appDataDir,
   basename,
   dirname,
   extname,
+  join,
   resolve,
 } from '@tauri-apps/api/path';
 
@@ -15,6 +18,23 @@ export type FilePathInfo = {
   root: string; // "notes"
   extension: string; // ".txt"
 };
+
+/**
+ * @description The directory "Resources" inside of the application bundle
+ */
+export const getResourcesDirectory = async (): Promise<string> =>
+  family() === "windows"
+    ? join(await appDataDir(), "/")
+    : join(await appDataDir(), "/../");
+
+/**
+ * @description The directory the application bundle resides inside.
+ */
+export const getBaseDirectory = async (): Promise<string> =>
+  family() === "windows"
+    ? join(await appDataDir(), "/../../../")
+    : join(await appDataDir(), "/../../../../");
+
 
 /**
  * @description Pick apart a file path into useful parts

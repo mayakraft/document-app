@@ -1,45 +1,54 @@
-import { ask } from "@tauri-apps/plugin-dialog";
-import { app, dialog } from "electron";
-import { promises as fs } from "node:fs";
-import path from "node:path";
-import { EXTENSION, FILE_TYPE_NAME } from "./filetype.ts";
+import {
+  open as systemOpenDialog,
+  save as systemSaveDialog,
+} from "@tauri-apps/plugin-dialog";
+import {
+  readTextFile as fsReadTextFile,
+  writeTextFile as fsWriteTextFile,
+  writeFile as fsWriteFile,
+} from "@tauri-apps/plugin-fs"
+import {
+  join,
+  homeDir,
+} from '@tauri-apps/api/path';
+import { EXTENSION, EXTENSIONS, FILE_TYPE_NAME } from "./types.ts";
 import { type FilePathInfo, getFilePathInfo } from "./path.ts";
 import { validateFileType } from "./validate.ts";
+import { defaultFileDialogFilter, openFileDialog } from "./dialogs.ts";
 
 /**
- * @description The directory "Resources" inside of the application bundle
+ *
  */
-export const getResourcesDirectory = (): string =>
-  process.platform === "win32"
-    ? path.join(app.getAppPath(), "/")
-    : path.join(app.getAppPath(), "/../");
+export const readTextFile = (filePath: string): Promise<string> => {
+  return fsReadTextFile(filePath);
+};
 
 /**
- * @description The directory the application bundle resides inside.
+ *
  */
-export const getBaseDirectory = (): string =>
-  process.platform === "win32"
-    ? path.join(app.getAppPath(), "/../../../")
-    : path.join(app.getAppPath(), "/../../../../");
+export const writeTextFile = (filePath: string, data: string): Promise<void> => {
+  return fsWriteTextFile(filePath, data);
+};
+
+/**
+ *
+ */
+export const writeFile = (filePath: string, data: Uint8Array): Promise<void> => {
+  return fsWriteFile(filePath, data);
+};
 
 /**
  * @description Perform an "Open File" operation, which tells the system
  * to open an open file dialog.
  */
-export const openFile = async (): Promise<{ data?: string; fileInfo?: FilePathInfo }> => {
-  const { canceled, filePaths } = await dialog.showOpenDialog({
-    properties: ["openFile"],
-  });
-  if (canceled) {
+export const openDialogAndReadFile = async (): Promise<{ data?: string; fileInfo?: FilePathInfo }> => {
+  const fileInfo = await openFileDialog(defaultFileDialogFilter());
+
+  if (fileInfo === undefined || !(await validateFileType(fileInfo))) {
     return {};
   }
-  // hardcoded ignoring more than 1 file
-  const filePath = filePaths[0];
-  const fileInfo = await getFilePathInfo(filePath);
-  if (!(await validateFileType(fileInfo))) {
-    return {};
-  }
-  const data = await fs.readFile(filePath, { encoding: "utf-8" });
+
+  const data = await readTextFile(fileInfo.fullpath);
   return { fileInfo, data };
 };
 
@@ -47,7 +56,7 @@ export const openFile = async (): Promise<{ data?: string; fileInfo?: FilePathIn
  * @description Perform a "SaveAs" operation for the currently opened file.
  */
 export const saveFileAs = async (data: string): Promise<FilePathInfo | undefined> => {
-  const defaultPath = app.getPath("home");
+  const defaultPath = await homeDir();
   const filters = [
     {
       name: FILE_TYPE_NAME,
@@ -56,11 +65,11 @@ export const saveFileAs = async (data: string): Promise<FilePathInfo | undefined
   ];
   const options =
     !defaultPath || defaultPath === "" ? { filters } : { filters, defaultPath };
-  const { canceled, filePath } = await dialog.showSaveDialog(options);
-  if (canceled) {
+  const filePath = await systemSaveDialog(options);
+  if (filePath === null) {
     return undefined;
   }
-  await fs.writeFile(filePath, data);
+  await writeTextFile(filePath, data);
   return getFilePathInfo(filePath);
 };
 
@@ -80,14 +89,9 @@ export const saveFile = async (
   if (!fileInfo || !fileInfo.fullpath) {
     return false;
   }
-  return fs
-    .access(fileInfo.fullpath, fs.constants.F_OK)
-    .catch(() => false)
-    .then(async () => {
-      // save file and overwrite contents
-      await fs.writeFile(fileInfo.fullpath, data);
-      return true;
-    });
+  // fs.access(fileInfo.fullpath, fs.constants.F_OK)
+  await writeTextFile(fileInfo.fullpath, data);
+  return true;
 };
 
 /**
@@ -125,34 +129,34 @@ export const exportTextFile = async (
   ext = "svg",
   typename = "image",
 ): Promise<void> => {
-  const { canceled, filePath } = await dialog.showSaveDialog({
+  const filePath = await systemSaveDialog({
     filters: [makeFileFilter(typename, ext)],
   });
-  if (canceled) {
+  if (filePath === null) {
     return;
   }
   const { directory, root } = await getFilePathInfo(filePath);
-  const joined = path.join(directory, `${root}.${ext}`);
-  fs.writeFile(joined, data);
+  const joined = await join(directory, `${root}.${ext}`);
+  writeTextFile(joined, data);
 };
 
 /**
  *
  */
 export const exportBinaryFile = async (
-  data: DataView,
+  data: Uint8Array,
   ext = "png",
   typename = "image",
 ): Promise<void> => {
-  const { canceled, filePath } = await dialog.showSaveDialog({
+  const filePath = await systemSaveDialog({
     filters: [makeFileFilter(typename, ext)],
   });
-  if (canceled) {
+  if (filePath === null) {
     return;
   }
   const { directory, root } = await getFilePathInfo(filePath);
-  const joined = path.join(directory, `${root}.${ext}`);
-  fs.writeFile(joined, data, null);
+  const joined = await join(directory, `${root}.${ext}`);
+  writeFile(joined, data);
 };
 
 /**
@@ -163,16 +167,16 @@ export const exportTextFiles = async (
   ext = "svg",
   typename = "image",
 ): Promise<void> => {
-  const { canceled, filePath } = await dialog.showSaveDialog({
+  const filePath = await systemSaveDialog({
     filters: [makeFileFilter(typename, ext)],
   });
-  if (canceled) {
+  if (filePath === null) {
     return;
   }
   const { directory, root, extension } = await getFilePathInfo(filePath);
   makeNumberedFilenames(data.length, root, extension).map(async (numberedName, i) => {
-    const outPath = path.join(directory, numberedName);
-    fs.writeFile(outPath, data[i]);
+    const outPath = await join(directory, numberedName);
+    writeTextFile(outPath, data[i]);
   });
 };
 
@@ -180,21 +184,21 @@ export const exportTextFiles = async (
  *
  */
 export const exportBinaryFiles = async (
-  binaryFiles: Buffer[] = [],
+  binaryFiles: Uint8Array[] = [],
   ext = "png",
   typename = "image",
 ): Promise<void> => {
-  const { canceled, filePath } = await dialog.showSaveDialog({
+  const filePath = await systemSaveDialog({
     filters: [makeFileFilter(typename, ext)],
   });
-  if (canceled) {
+  if (filePath === null) {
     return;
   }
   const { directory, root, extension } = await getFilePathInfo(filePath);
   makeNumberedFilenames(binaryFiles.length, root, extension).map(
     async (numberedName, i) => {
-      const outPath = path.join(directory, numberedName);
-      fs.writeFile(outPath, binaryFiles[i]);
+      const outPath = await join(directory, numberedName);
+      writeFile(outPath, binaryFiles[i]);
     },
   );
 };

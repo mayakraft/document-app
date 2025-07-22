@@ -1,5 +1,7 @@
+import { exit } from "@tauri-apps/plugin-process";
 import file from "../state/file.svelte.ts";
-import { saveFileAs } from "./saveFile.svelte.ts";
+import { saveFileAs } from "./save.svelte.ts";
+import { unsavedChangesDialog } from "../system/dialogs.ts";
 
 /**
  * @description methods available to both the front and back ends.
@@ -18,9 +20,8 @@ let quitInProgress = false;
 export const quitApp = async (): Promise<void> => {
   // console.log("quit app request");
   if (file.modified) {
-    // 0: "yes", 1: "cancel", 2: "no"
-    const { response } = await window.api.unsavedChangesDialog();
-    if (response === 0) {
+    const response = await unsavedChangesDialog();
+    if (response === false) {
       const info = await saveFileAs();
       // save was cancelled
       if (info === undefined) {
@@ -28,12 +29,13 @@ export const quitApp = async (): Promise<void> => {
       }
       console.log(info);
     }
-    if (response === 1) {
-      return;
-    }
+    // temporarily mute "cance" until Tauri has 3-button dialogs
+    // if (response === 1) {
+    //   return;
+    // }
   }
   quitInProgress = true;
-  window.api.quitApp();
+  exit();
 };
 
 /**
@@ -49,9 +51,10 @@ window.addEventListener("beforeunload", (event) => {
   event.returnValue = false;
   setTimeout(async () => {
     // 0: "yes", 1: "cancel", 2: "no"
-    const { response } = await window.api.unsavedChangesDialog();
-    quitInProgress = response === 2;
-    if (response === 0) {
+    const response = await unsavedChangesDialog();
+    // quitInProgress = response === 2;
+    quitInProgress = response === true;
+    if (response === false) {
       // set quitInProgress based on the result of saveFileAs
       const info = await saveFileAs();
       console.log(info);
@@ -60,11 +63,11 @@ window.addEventListener("beforeunload", (event) => {
         return;
       } else {
         // save successful
-        window.api.quitApp();
+        exit();
       }
     }
-    if (response === 2) {
-      window.api.quitApp();
+    if (response === true) {
+      exit();
     }
   });
 });

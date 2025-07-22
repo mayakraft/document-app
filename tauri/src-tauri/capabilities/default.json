@@ -11,6 +11,7 @@
     "core:window:allow-set-title",
     "dialog:default",
     "dialog:allow-open",
+    "dialog:allow-save",
     "fs:allow-app-read",
     "fs:allow-app-write",
     "fs:allow-write-text-file",
@@ -22,6 +23,9 @@
         }
       ]
     },
-    "fs:default"
+    "fs:default",
+    "os:default",
+    "os:default",
+    "process:default"
   ]
 }

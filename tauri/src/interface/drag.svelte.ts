@@ -1,6 +1,35 @@
-import type { FilePathInfo } from "../fs/path.ts";
+import type { FilePathInfo } from "../system/path.ts";
 import { model } from "../state/model.svelte.ts";
 import file from "../state/file.svelte.ts";
+import { getFilePathInfo } from "../system/path.ts";
+import { saveFileAs } from "./save.svelte.ts";
+import { unsavedChangesDialog } from "../system/dialogs.ts";
+import { openFile as openFileDialog } from "../system/fs.ts";
+
+export const dragDropOpenFile = async (filePath: string): Promise<void> => {
+  if (file.modified) {
+    // 0: "yes", 1: "cancel", 2: "no"
+    const response = await unsavedChangesDialog("Yes", "No", "Cancel");
+    console.log("response", response);
+    if (response === false) {
+      return;
+    }
+    if (response === true) {
+      // request to save
+      await saveFileAs();
+    }
+  }
+
+  const { fileInfo, data } = dragDropOpenFile();
+
+  if (data === undefined) { return; }
+
+  if (fileInfo) {
+    model.value = data;
+    file.info = fileInfo;
+    file.modified = false;
+  }
+};
 
 /**
  * @description this method is bound directly to the window DragEvent "ondrop"
@@ -31,7 +60,7 @@ export const fileDropDidUpdate = async (event: DragEvent): Promise<void> => {
 
     if (transferFile) {
       // todo: for some reason, File type (contents) does not contain .path, but it does.
-      info = await window.api.makeFilePathInfo(transferFile.contents.path);
+      info = await getFilePathInfo(transferFile.contents.path);
 
       //console.log(transferFile.contents.path);
       const reader = new FileReader();

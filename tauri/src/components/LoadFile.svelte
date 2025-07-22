@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { newFile } from "../interface/newFile.svelte.ts";
-  import { openFile } from "../interface/openFile.svelte.ts";
-  import { saveFile, saveFileAs } from "../interface/saveFile.svelte.ts";
+  import { newFile } from "../interface/new.svelte.ts";
+  import { openFile } from "../interface/open.svelte.ts";
+  import { saveFile, saveFileAs } from "../interface/save.svelte.ts";
 </script>
 
 <div>

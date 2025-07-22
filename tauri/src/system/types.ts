@@ -5,7 +5,10 @@
  */
 export const EXTENSION = "txt";
 
+export const EXTENSIONS = ["txt", "md"];
+
 /**
  * @description the human readable name for the above format.
  */
 export const FILE_TYPE_NAME = "Text files";
+

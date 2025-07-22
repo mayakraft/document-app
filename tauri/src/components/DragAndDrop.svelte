@@ -1,29 +1,34 @@
 <script lang="ts">
-  import { fileDropDidUpdate } from "../interface/dropFile.svelte.ts";
+  import { onMount, onDestroy } from "svelte";
+  import { getCurrentWebview } from "@tauri-apps/api/webview";
+  import { openFile } from "../interface/open.svelte.ts";
 
   let isHovering = $state(false);
+  let unlisten: Function | undefined;
 
-  const ondragenter = (e: DragEvent): void => {
-    e.preventDefault();
-    isHovering = true;
-  };
+  onMount(async () => {
+    await getCurrentWebview().onDragDropEvent((event) => {
+      if (event.payload.type === "over") {
+        isHovering = true;
+        console.log("User hovering", event.payload.position);
+      } else if (event.payload.type === "drop") {
+        console.log("User dropped", event.payload.paths);
+        const filePaths = event.payload.paths;
+        const filePath = filePaths[0];
+        isHovering = false;
+      } else {
+        isHovering = false;
+        console.log("File drop cancelled");
+      }
+    });
+  });
 
-  const ondragleave = (e: DragEvent): void => {
-    e.preventDefault();
-    isHovering = false;
-  };
-
-  const ondragover = (e: DragEvent): void => {
-    e.preventDefault();
-    isHovering = true;
-  };
-
-  const ondrop = (event: DragEvent): void => {
-    event.preventDefault();
-    event.stopPropagation();
-    isHovering = false;
-    fileDropDidUpdate(event);
-  };
+  onDestroy(() => {
+    if (unlisten !== undefined) {
+      unlisten();
+    }
+    unlisten = undefined;
+  })
 </script>
 
 <svelte:body {ondragenter} {ondragleave} {ondragover} {ondrop} />

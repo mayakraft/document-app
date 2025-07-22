@@ -1,6 +1,7 @@
 import { model } from "../state/model.svelte.ts";
 import file from "../state/file.svelte.ts";
 import { EXTENSION, UNTITLED_FILENAME } from "../state/app.svelte.ts";
+import { unsavedChangesDialog } from "../system/dialogs.ts";
 
 /**
  * @description ask the app to create a new file.
@@ -10,9 +11,10 @@ import { EXTENSION, UNTITLED_FILENAME } from "../state/app.svelte.ts";
  */
 export const newFile = async (): Promise<void> => {
   if (file.modified) {
-    const { response } = await window.api.unsavedChangesDialog("New File", "Cancel");
-    if (response !== 0) {
-      return;
+    switch (await unsavedChangesDialog("New File", "Cancel")) {
+      case true: break;
+      case false: return;
+      // case yes: saveFileAs(); break;
     }
   }
   model.value = "";
