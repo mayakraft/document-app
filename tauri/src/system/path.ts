@@ -4,7 +4,7 @@ import {
   basename,
   dirname,
   extname,
-  join,
+  join as pathJoin,
   resolve,
 } from '@tauri-apps/api/path';
 
@@ -19,22 +19,42 @@ export type FilePathInfo = {
   extension: string; // ".txt"
 };
 
+export const join = (...paths: string[]): Promise<string> => pathJoin(...paths);
+
 /**
  * @description The directory "Resources" inside of the application bundle
  */
-export const getResourcesDirectory = async (): Promise<string> =>
-  family() === "windows"
-    ? join(await appDataDir(), "/")
-    : join(await appDataDir(), "/../");
+// export const getResourcesDirectory = async (): Promise<string> =>
+//   family() === "windows"
+//     ? pathJoin(await appDataDir(), "/")
+//     : pathJoin(await appDataDir(), "/../");
 
 /**
  * @description The directory the application bundle resides inside.
  */
-export const getBaseDirectory = async (): Promise<string> =>
-  family() === "windows"
-    ? join(await appDataDir(), "/../../../")
-    : join(await appDataDir(), "/../../../../");
+// export const getBaseDirectory = async (): Promise<string> =>
+//   family() === "windows"
+//     ? pathJoin(await appDataDir(), "/../../../")
+//     : pathJoin(await appDataDir(), "/../../../../");
 
+/**
+ * @description Convert a file name (name + extension) into a sequence of
+ * filenames that take the form of name-0000N.ext where 000N is a number
+ * that counts up from 0 to "count" - 1, and 000N will have the minimum
+ * number of preceding zeros to pad all numbers to be the same length.
+ */
+export const makeNumberedFilenames = (
+  count: number,
+  name: string,
+  extension: string,
+): string[] => {
+  const places = count.toString().length;
+  const zeros = Array(places).fill(0).join("");
+  return Array.from(Array(count))
+    .map((_, i) => `${zeros}${i}`)
+    .map((str) => str.slice(str.length - places, str.length))
+    .map((num) => `${name}-${num}${extension}`);
+};
 
 /**
  * @description Pick apart a file path into useful parts

@@ -1,24 +1,25 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { getCurrentWebview } from "@tauri-apps/api/webview";
-  import { openFile } from "../interface/open.svelte.ts";
+  import { dragOpenFile } from "../interface/drag.svelte.ts";
 
   let isHovering = $state(false);
   let unlisten: Function | undefined;
 
   onMount(async () => {
-    await getCurrentWebview().onDragDropEvent((event) => {
+    await getCurrentWebview().onDragDropEvent(async (event) => {
       if (event.payload.type === "over") {
+        // console.log("User hovering", event.payload.position);
         isHovering = true;
-        console.log("User hovering", event.payload.position);
       } else if (event.payload.type === "drop") {
-        console.log("User dropped", event.payload.paths);
+        // console.log("User dropped", event.payload.paths);
+        isHovering = false;
         const filePaths = event.payload.paths;
         const filePath = filePaths[0];
-        isHovering = false;
+        await dragOpenFile(filePath);
       } else {
-        isHovering = false;
         console.log("File drop cancelled");
+        isHovering = false;
       }
     });
   });

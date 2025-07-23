@@ -7,6 +7,13 @@ import { defaultFileDialogFilter, saveFileAsDialog } from "../system/dialogs.ts"
 /**
  * @description ask the app to save the currently opened file.
  * this can be called from the front-end or the back-end.
+ *
+ * @description Perform a "Save" operation for the currently opened file.
+ * if the file exists it will be overwritten,
+ * if the file does not exist it will be silently created then written to.
+ * returns true if the write was successful
+ * returns false if the write was unsuccessful, it might be customary to
+ * run the "saveAs" method.
  */
 export const saveFile = async (): Promise<void> => {
   if (!file.info) { return; }

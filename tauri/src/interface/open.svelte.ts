@@ -23,14 +23,16 @@ export const openFile = async (): Promise<void> => {
       return;
     }
     if (response === true) {
+      // todo: if they cancel from this dialog
       await saveFileAs();
     }
   }
 
   const fileInfo = await openFileDialog(defaultFileDialogFilter());
-  if (fileInfo === undefined || !(await validateFileType(fileInfo))) {
-    return;
-  }
+
+  if (fileInfo === undefined) { return; }
+  if (!(await validateFileType(fileInfo))) { return; }
+
   const data = await readTextFile(fileInfo.fullpath);
 
   if (fileInfo) {
