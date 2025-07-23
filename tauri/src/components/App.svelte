@@ -3,6 +3,8 @@
   import LoadFile from "./LoadFile.svelte";
   import TextArea from "./TextArea.svelte";
   import DragAndDrop from "./DragAndDrop.svelte";
+  import { buildMenu } from "../system/menu";
+  buildMenu();
 </script>
 
 <main>
