@@ -1,9 +1,6 @@
 <script lang="ts">
   import { getCurrentWindow } from "@tauri-apps/api/window";
-  import { getAppTitle } from "../state/app.svelte.ts";
-
-  // cache the current title of the app window
-  let previousAppTitle = "";
+  import { appSettings } from "../state/app.svelte.ts";
 
   /**
    * @description update the system app title name to include the file name
@@ -11,10 +8,6 @@
    * send an update if the desired and the current titles differ.
    */
   $effect(() => {
-    if (getAppTitle() === previousAppTitle) {
-      return;
-    }
-    previousAppTitle = getAppTitle();
-    getCurrentWindow().setTitle(getAppTitle());
+    getCurrentWindow().setTitle(appSettings.appTitle);
   });
 </script>

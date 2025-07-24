@@ -1,16 +1,14 @@
 <script lang="ts">
   import AppTitle from "./AppTitle.svelte";
-  import LoadFile from "./LoadFile.svelte";
+  import ButtonBar from "./ButtonBar.svelte";
   import TextArea from "./TextArea.svelte";
   import DragAndDrop from "./DragAndDrop.svelte";
-  import { buildMenu } from "../system/menu";
-  buildMenu();
 </script>
 
 <main>
   <AppTitle />
   <DragAndDrop />
-  <LoadFile />
+  <ButtonBar />
   <TextArea />
 </main>
 

@@ -44,6 +44,7 @@ const aboutSubmenu = await Submenu.new({
       id: 'quit',
       text: 'Quit',
       action: quitApp,
+      accelerator: "CmdOrCtrl+Q",
     }),
   ],
 });
@@ -70,8 +71,8 @@ const fileSubmenu = await Submenu.new({
     }),
 
     await MenuItem.new({
-      id: 'save_as',
-      text: 'Save As...',
+      id: 'save',
+      text: 'Save',
       action: saveFile,
       accelerator: "CmdOrCtrl+S",
     }),
@@ -141,7 +142,5 @@ const menu = await Menu.new({
   items: [aboutSubmenu, fileSubmenu, editSubmenu],
 });
 
-export const buildMenu = () => {
-  menu.setAsAppMenu();
-};
+menu.setAsAppMenu();
 

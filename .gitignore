@@ -1,5 +1,6 @@
 Cargo.lock
-src-tauri/target/
+**/src-tauri/target/
+**/tauri/build/
 
 # Logs
 logs

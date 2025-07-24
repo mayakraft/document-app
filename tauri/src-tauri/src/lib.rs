@@ -21,13 +21,24 @@ fn open_file(path: String) -> Result<String, String> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let app = tauri::Builder::default()
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![greet, save_file, open_file])
-        .run(tauri::generate_context!())
+        .build(tauri::generate_context!())
         .expect("error while running tauri application");
+
+    // not working due to issue: https://github.com/tauri-apps/tauri/issues/9198
+    // app.run(|_app_handle, event| match event {
+    //     tauri::RunEvent::ExitRequested {api, ..} => {
+    //         api.prevent_exit();
+    //         println!("No Exit");
+    //     },
+    //     _ => {}
+    // });
+
+    app.run(|_, __| {});
 }

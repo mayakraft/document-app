@@ -1,18 +1,21 @@
 # Electron / Tauri document app
 
-A **document app** is an app whose sole purpose is to edit a file; the name comes from the MacOS app class name. This app is able to open and modify a file (a text file in this case), or start a new file from scratch. The app provides the typical UI expected in this case like prompting before exiting an unsaved file and prompting before overwriting.
+A **document app** is an app whose purpose is to edit a file (open, edit, save changes).
 
-This project exists in two implementations, one in [Electron](https://www.electronjs.org/), one in [Tauri](https://tauri.app/), the app itself is cross-platform (Windows, Mac, Linux), both app's front ends are built in Svelte 5 using the new runes system (at this time, in release-candidate phase).
+This repo contains two separate apps in both [Tauri](https://tauri.app/) and [Electron](https://www.electronjs.org/), each a stripped-down implementation of a document app containing the features:
 
-Use this as a foundation and build your app on top of it.
+- The app titlebar includes the name of the current opened filename.
+- The app titlebar appends a \* character if the file is modified and not yet saved.
+- The app will warn the user if the file is modified and unsaved before quitting the app.
+- The app will warn the user if the file is modified and unsaved before replacing the file with a new file.
 
-# implementation
+This implementation uses a text file as the native file format, but can be easily changed to be an image editing app or any type of file.
 
-The two repos (Electron and Tauri) are intended to be as close to the same app as possible. The front ends are more similar, the back ends differ heavily, and there are some differences regarding IPC (inter-process communication).
+There are many differences between the Tauri and Electron implementations, for example, Tauri exposes many of the backend system methods (fs, path) to be able to be called from the front end, where Electron requires a message-calling IPC system, and as a result is a bit more complex.
 
-- no interface/index.ts in Tauri
+> Tauri 2.0 is still under active development, contains many issues, a few of which are present in this app. As of 2025 the Electron project is the more stable of the two. Issues are enumerated below.
 
-# Usage
+# Behavior
 
 The designated file type is .txt.
 
@@ -37,6 +40,11 @@ Then there is another sequence where a file is modified and the user triggers a 
 - Dragging and dropping a file into the app window
 
 In this case, test the same series of tests as the list above.
+
+# Known Issues
+
+- Tauri. 3-button dialogs are not yet available. This prevents implementation of the common UI pattern "Your file is unmodified, do you want to save before exiting?" with the options: Yes, No, Cancel.
+- Tauri. Preventing exit without save on MacOS is stalled because of [this issue](https://github.com/tauri-apps/tauri/issues/9198).
 
 # Developers
 

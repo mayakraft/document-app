@@ -54,7 +54,6 @@ export const openFileDialog = async (filter?: DialogFilter): Promise<FilePathInf
  */
 export const saveFileAsDialog = async (filter?: DialogFilter): Promise<FilePathInfo | undefined> => {
   const defaultPath = await homeDir();
-  console.log("save file as, default path (home dir)", defaultPath);
   const filters = filter ? [filter] : [];
   const options = !defaultPath || defaultPath === ""
     ? { filters }

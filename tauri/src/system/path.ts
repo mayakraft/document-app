@@ -1,6 +1,4 @@
-import { family } from "@tauri-apps/plugin-os";
 import {
-  appDataDir,
   basename,
   dirname,
   extname,
@@ -20,22 +18,6 @@ export type FilePathInfo = {
 };
 
 export const join = (...paths: string[]): Promise<string> => pathJoin(...paths);
-
-/**
- * @description The directory "Resources" inside of the application bundle
- */
-// export const getResourcesDirectory = async (): Promise<string> =>
-//   family() === "windows"
-//     ? pathJoin(await appDataDir(), "/")
-//     : pathJoin(await appDataDir(), "/../");
-
-/**
- * @description The directory the application bundle resides inside.
- */
-// export const getBaseDirectory = async (): Promise<string> =>
-//   family() === "windows"
-//     ? pathJoin(await appDataDir(), "/../../../")
-//     : pathJoin(await appDataDir(), "/../../../../");
 
 /**
  * @description Convert a file name (name + extension) into a sequence of

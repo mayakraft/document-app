@@ -1,15 +1,15 @@
-import { model } from "../state/model.svelte.ts";
 import file from "../state/file.svelte.ts";
-import { getFilePathInfo } from "../system/path.ts";
-import { saveFileAs } from "./save.svelte.ts";
+import { model } from "../state/model.svelte.ts";
 import { unsavedChangesDialog } from "../system/dialogs.ts";
-import { validateFileType } from "../system/validate.ts";
 import { readTextFile } from "../system/fs.ts";
+import { getFilePathInfo } from "../system/path.ts";
+import { validateFileType } from "../system/validate.ts";
+import { saveFileAs } from "./save.svelte.ts";
 
 export const dragOpenFile = async (filePath: string): Promise<void> => {
   if (file.modified) {
+    // todo: when 3-button dialogs are re-introduced this needs updating
     const response = await unsavedChangesDialog("Yes", "No", "Cancel");
-    console.log("open file, save current file", response);
     if (response === false) {
       return;
     }
@@ -31,4 +31,3 @@ export const dragOpenFile = async (filePath: string): Promise<void> => {
     file.modified = false;
   }
 };
-

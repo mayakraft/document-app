@@ -12,6 +12,7 @@ import { unsavedChangesDialog } from "../system/dialogs.ts";
  */
 export const newFile = async (): Promise<void> => {
   if (file.modified) {
+    // todo: when 3-button dialogs are re-introduced this needs updating
     switch (await unsavedChangesDialog("New File", "Cancel")) {
       case true: break;
       case false: return;

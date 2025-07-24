@@ -20,6 +20,7 @@ let quitInProgress = false;
 export const quitApp = async (): Promise<void> => {
   // console.log("quit app request");
   if (file.modified) {
+    // todo: when 3-button dialogs are re-introduced this needs updating
     const response = await unsavedChangesDialog();
     if (response === false) {
       const info = await saveFileAs();
@@ -42,6 +43,8 @@ export const quitApp = async (): Promise<void> => {
  * @description Protection for quitting the app with the "X" or red circle.
  * This will prompt the user if there are unsaved changes.
  */
+// todo: this does not work, currently do to an issue which is already
+// reported on Github, where MacOS before quit handler is missed.
 window.addEventListener("beforeunload", (event) => {
   if (!file.modified || quitInProgress) {
     return;

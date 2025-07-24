@@ -17,8 +17,8 @@ import { readTextFile } from "../system/fs.ts";
  */
 export const openFile = async (): Promise<void> => {
   if (file.modified) {
+    // todo: when 3-button dialogs are re-introduced this needs updating
     const response = await unsavedChangesDialog("Yes", "No", "Cancel");
-    console.log("open file, save current file", response);
     if (response === false) {
       return;
     }

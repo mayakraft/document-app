@@ -38,7 +38,6 @@ export const saveFileAs = async (): Promise<FilePathInfo | undefined> => {
   const fileInfo = await saveFileAsDialog(defaultFileDialogFilter());
   if (!fileInfo) { return undefined; }
   await writeTextFile(fileInfo?.fullpath, model.value);
-  console.log("saveFileAs", fileInfo);
   if (fileInfo) {
     file.info = fileInfo;
     file.modified = false;

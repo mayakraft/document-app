@@ -14,7 +14,7 @@ export const createSignal = <T>(val: T): { value: T } => {
 };
 
 /**
- * @description Literally, just the contents of the file as a text string,
+ * @description Literally, just the contents of the opened file as a text string,
  * this is one level of abstraction away from the raw byte contents of a file,
  * because this app only ever uses files which are text files.
  */

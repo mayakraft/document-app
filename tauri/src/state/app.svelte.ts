@@ -11,14 +11,16 @@ export const APP_NAME = "Document App";
  */
 export const UNTITLED_FILENAME = `untitled.${EXTENSION}`;
 
-/**
- * @description Watch "FilePath" for any changes, update the window title
- * to include the currently opened filename.
- */
-const appTitle = $derived.by<string>(() => {
-  const displayName = file.info === undefined ? UNTITLED_FILENAME : file.info.file;
-  const savedIndicator = file.modified ? " *" : "";
-  return `${APP_NAME} - ${displayName}${savedIndicator}`;
-});
+class AppSettings {
+  /**
+   * @description Watch "FilePath" for any changes, update the window title
+   * to include the currently opened filename.
+   */
+  appTitle: string = $derived.by<string>(() => {
+    const displayName = file.info === undefined ? UNTITLED_FILENAME : file.info.file;
+    const savedIndicator = file.modified ? " *" : "";
+    return `${APP_NAME} - ${displayName}${savedIndicator}`;
+  });
+};
 
-export const getAppTitle = (): string => appTitle;
+export const appSettings = new AppSettings();

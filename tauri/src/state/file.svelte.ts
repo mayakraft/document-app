@@ -1,13 +1,5 @@
 import type { FilePathInfo } from "../system/path.ts";
 
-//const emptyFilePathInfo = () => ({
-//  fullpath: "",
-//  directory: "",
-//  file: "",
-//  root: "",
-//  extension: "",
-//});
-
 class File {
   // The currently opened filename as a full path, including the directory prefix.
   info: FilePathInfo | undefined = $state();
